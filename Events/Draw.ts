@@ -8,7 +8,7 @@ import {
 	DOTAGameUIState_t,
 	EventsSDK, GameRules,
 	GameState,
-	item_black_king_bar, item_tpscroll,
+	item_tpscroll,
 	RendererSDK, Vector2,
 } from "wrapper/Imports"
 
@@ -75,17 +75,7 @@ EventsSDK.on("Draw", () => {
 				RectangleX.Image(item.TexturePath, rectangle3)
 
 				if (ItemPanelChargeState.value && item.Cooldown === 0 && (item.IsDisplayingCharges || ItemPanelData.ItemDisplayingCharges(item))) {
-					let text = item.CurrentCharges
-					if (item instanceof item_black_king_bar) {
-						switch (item.Owner?.BKBChargesUsed) {
-							case 0: text = 10; break
-							case 1: text = 9; break
-							case 2: text = 8; break
-							case 3: text = 7; break
-							case 4: text = 6; break
-							case 5: text = 5; break
-						}
-					}
+					const text = item.CurrentCharges
 					const vector2 = RendererSDK.GetTextSize(text.toString(), RendererSDK.DefaultFontName, ItemSize.y * 0.8)
 					const rec4 = rectangle3.SinkToBottomRight(vector2.x * 1.1, vector2.y * 0.8)
 					RectangleX.FilledRect(rec4, Color.Black)
