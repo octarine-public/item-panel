@@ -1,6 +1,6 @@
 import { GUIInfo, Menu, RendererSDK, Vector2 } from "wrapper/Imports"
 
-const ItemPanelTree = Menu.AddEntryDeep(["Visual", "Item Panel"])
+const ItemPanelTree = Menu.AddEntryDeep(["Visual", "Item Panel"], ["panorama/images/control_icons/hamburger_png.vtex_c"])
 export const ItemPanelState = ItemPanelTree.AddToggle("State", false, "State script: ON or OFF")
 
 export const ItemPanelAllyState = ItemPanelTree.AddToggle("Ally")
