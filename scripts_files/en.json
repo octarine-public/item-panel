@@ -1,0 +1,10 @@
+{
+	"ItemPanel_KeyMode": "Bind mode",
+	"ItemPanel_Key": "Bind",
+	"ItemPanel_Keys": "Binds",
+	"ItemPanel_EmptySlot": "Show empty slots",
+	"ItemPanel_Charge_State": "Show charges",
+	"ItemPanel_Cooldwn_State": "Show cooldowns",
+	"ItemPanel_PingClick": "Ping on click",
+	"ItemPanel_Drag": "< Drag >"
+}

@@ -1,0 +1,10 @@
+{
+	"ItemPanel_KeyMode": "綁定模式",
+	"ItemPanel_Key": "綁定",
+	"ItemPanel_Keys": "綁定",
+	"ItemPanel_EmptySlot": "顯示空槽",
+	"ItemPanel_Charge_State": "顯示費用",
+	"ItemPanel_Cooldwn_State": "顯示冷卻時間",
+	"ItemPanel_PingClick": "點擊時 Ping",
+	"ItemPanel_Drag": "< 拖 >"
+}

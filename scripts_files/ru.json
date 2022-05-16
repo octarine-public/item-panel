@@ -1,0 +1,17 @@
+{
+	"Ally": "Союзники",
+	"Item Panel": "Панель предметов",
+	"Backpack": "Рюкзак",
+	"ItemPanel_KeyMode": "Режим бинда",
+	"Hold key": "Удерживать",
+	"Toggled": "Переключать",
+	"ItemPanel_Key": "Бинд",
+	"Key bind turn on/off panel": "Клавиша бинда на включение и выключение панели",
+	"ItemPanel_Keys": "Бинды",
+	"ItemPanel_EmptySlot": "Показать пустые слоты",
+	"ItemPanel_Charge_State": "Количество чарджей",
+	"ItemPanel_Cooldwn_State": "Время перезарядки",
+	"ItemPanel_PingClick": "Оповещения",
+	"ItemPanel_Drag": "< Перенести >",
+	"Hide items": "Скрыть предметы"
+}
