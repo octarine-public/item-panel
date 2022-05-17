@@ -45,7 +45,7 @@ export default class ItemPanelManager {
 		for (const unit of sort) {
 
 			const items = unit.Items
-			if (items.length === 0)
+			if (items.length === 0 || (!this.menu.CouriersState.value && unit.IsCourier))
 				continue
 
 			const vSize = new Vector2(panel.x + HeroSize.x, panel.y)
@@ -65,14 +65,14 @@ export default class ItemPanelManager {
 
 			for (let index = items.length - 1; index > -1; index--) {
 
-				const [texture, remaining, charge, isTpScroll, isTravelBoots, cooldown_ratio, , isMuted, , IsBackPack] = items[index]
+				const [texture, charge, remaining, isTpScroll, isTravelBoots, cooldown_ratio, , isMuted, , IsBackPack] = items[index]
 
 				if ((isTpScroll || isTravelBoots) && unit.IsHero) {
 					const [position, size] = this.RightPositionUnit(ItemSize, HeroSize, panel)
 					const rectPosition = new RectangleX(position, size)
 					const height = Math.round(rectPosition.Height / 5)
 					RectangleX.Image(texture, rectPosition, Color.White, 0, IsHover)
-					if (remaining !== 0)
+					if (remaining > 0)
 						RendererSDK.Arc(-90, cooldown_ratio, rectPosition.pos1, rectPosition.pos2, false, height, Color.Red)
 					continue
 				}
@@ -82,9 +82,9 @@ export default class ItemPanelManager {
 
 				RectangleX.Image(texture, items_position_2, Color.White, -1, isMuted || IsHover || IsBackPack)
 
-				if (remaining !== 0 && this.menu.CooldwnState.value) {
+				if (remaining > 0 && this.menu.CooldwnState.value) {
 
-					const text = remaining >= 100
+					const text = remaining > 60
 						? this.secondToMin(remaining)
 						: remaining < 10 ? remaining.toFixed(1) : Math.ceil(remaining).toFixed()
 
@@ -92,7 +92,7 @@ export default class ItemPanelManager {
 					RectangleX.Text(text, items_position_2)
 				}
 
-				if (remaining !== 0 && charge !== 0 && this.menu.ChargeState.value)
+				if (remaining <= 0 && charge !== 0 && this.menu.ChargeState.value)
 					RectangleX.Text(charge.toFixed(), items_position_2, Color.White, 2, FlagText.BOT_RIGHT, {
 						filedRect: true,
 					})

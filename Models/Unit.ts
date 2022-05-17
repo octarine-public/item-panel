@@ -1,4 +1,4 @@
-import { AbilityX, HeroX, PathX, PlayerX, UnitX } from "immortal-core/Imports"
+import { AbilityX, CourierX, HeroX, PathX, PlayerX, UnitX } from "immortal-core/Imports"
 import { ArrayExtensions } from "wrapper/Imports"
 import DrawInteraction from "../Drawable/Index"
 import DrwableItems, { IDrwableUnit } from "../Drawable/Items"
@@ -63,8 +63,8 @@ export default class UnitModel {
 	protected DrawTypeMap(models: ItemModel[]): DrawItems[] {
 		return models.map(model => [
 			model.TexturePath,
-			model.RemainingCooldown,
 			model.Charges,
+			model.RemainingCooldown,
 			model.IsTpScroll,
 			model.HasTravelBoots,
 			model.RemainingCooldown,
@@ -110,6 +110,7 @@ export default class UnitModel {
 			isHero: this.Unit.IsHero ?? false,
 			images: PathX.Unit({ name: this.Unit.Name, team: this.Unit.Team }),
 			ownerImages: PathX.Unit({ name: ownerName, team: this.Unit.Team, iconSmall: true }),
+			isCourier: this.Unit instanceof CourierX,
 		})
 	}
 }

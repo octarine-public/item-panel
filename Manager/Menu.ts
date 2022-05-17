@@ -13,6 +13,7 @@ export default class MenuManager {
 	public PassiveState: Menu.Toggle
 
 	public AllyState: Menu.Toggle
+	public CouriersState: Menu.Toggle
 	public BackPackState: Menu.Toggle
 	public PingClick: Menu.Toggle
 	public CooldwnState: Menu.Toggle
@@ -38,6 +39,7 @@ export default class MenuManager {
 		this.IState = this.Tree.AddToggle("State", true)
 
 		this.AllyState = this.Tree.AddToggle("Ally")
+		this.CouriersState = this.Tree.AddToggle("Couriers")
 		this.BackPackState = this.Tree.AddToggle("Backpack", true)
 		this.PingClick = this.Tree.AddToggle("ItemPanel_PingClick", true)
 		this.CooldwnState = this.Tree.AddToggle("ItemPanel_Cooldwn_State", true)

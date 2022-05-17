@@ -5,6 +5,7 @@ export interface IDrwableUnit {
 	isHero: boolean,
 	items: DrawItems[]
 	ownerImages: string
+	isCourier: boolean
 }
 
 export default class DrwableUnit {
@@ -21,6 +22,10 @@ export default class DrwableUnit {
 
 	public get IsHero() {
 		return this.option.isHero
+	}
+
+	public get IsCourier() {
+		return this.option.isCourier
 	}
 
 	public get OwnerTextute() {
