@@ -1,4 +1,4 @@
-import { AbilityX, CourierX, EntityManagerX, EntityX, FlagText, HeroX, PathX, RectangleX, SpiritBearX, UnitX } from "immortal-core/Imports"
+import { AbilityX, CourierX, EntityManagerX, EntityX, FlagText, HeroX, PathX, RectangleX, SpiritBearX, UnitX, Util } from "immortal-core/Imports"
 import { ArrayExtensions, Color, DOTAGameUIState_t, DOTA_GameState, GameRules, GameState, Input, Menu, RendererSDK, Vector2, VMouseKeys } from "wrapper/Imports"
 import { MapDrawable } from "../Drawable/Index"
 import { KeyMode } from "../Enum/KeyMode"
@@ -85,11 +85,11 @@ export default class ItemPanelManager {
 				if (remaining > 0 && this.menu.CooldwnState.value) {
 
 					const text = remaining > 60
-						? this.secondToMin(remaining)
+						? Util.FormatTime(remaining)
 						: remaining < 10 ? remaining.toFixed(1) : Math.ceil(remaining).toFixed()
 
 					RectangleX.Image(PathX.Images.softedge_horizontal, items_position_2, Color.Black.SetA(165))
-					RectangleX.Text(text, items_position_2)
+					RectangleX.Text(text, items_position_2, Color.White, 1.65)
 				}
 
 				if (remaining <= 0 && charge !== 0 && this.menu.ChargeState.value)
@@ -274,11 +274,6 @@ export default class ItemPanelManager {
 		const pos = vector.Add(new Vector2(HeroSize.x * 0.65, HeroSize.y * 0.4))
 		const size = new Vector2(ItemSize.x * 0.6, ItemSize.x * 0.6)
 		return [pos, size]
-	}
-
-	private secondToMin(time: number, chat: boolean = false) {
-		time = Math.floor(time)
-		return ~~(time / 60) + (!chat ? ":" : "") + (time % 60 < 10 ? "0" : "") + time % 60
 	}
 
 	private IsValidInput(key: VMouseKeys) {
