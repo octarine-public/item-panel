@@ -31,16 +31,16 @@ export default class ItemPanelManager {
 		const panel = this.menu.GetItemPanelPos
 		const panelPosDraw = panel.Clone()
 		const mousePos = Input.CursorOnScreen
+
+		const sort = ArrayExtensions.orderBy([...MapDrawable.values()], x => !x.IsHero)
 		const IsHover = mousePos.IsUnderRectangle(panel.x, panel.y, HeroSize.x, HeroSize.y)
 
-		if (this.dirtyPosition) {
+		if (this.dirtyPosition && sort.length !== 0) {
 			Menu.Base.SaveConfigASAP = true
 			panel.CopyFrom(mousePos.Subtract(this.mouseOnPanel))
 			this.menu.PositionX.value = panel.Round(1).x
 			this.menu.PositionY.value = panel.Round(1).y
 		}
-
-		const sort = ArrayExtensions.orderBy([...MapDrawable.values()], x => !x.IsHero)
 
 		for (const unit of sort) {
 
@@ -186,6 +186,10 @@ export default class ItemPanelManager {
 			return true
 
 		const sort = ArrayExtensions.orderBy([...MapDrawable.values()], x => !x.IsHero)
+
+		if (sort.length === 0)
+			return true
+
 		for (const unit of sort) {
 			const items = unit.Items
 			if (items.length === 0)
@@ -206,6 +210,7 @@ export default class ItemPanelManager {
 			}
 			panelPosition.AddScalarY(HeroSize.y)
 		}
+
 		return true
 	}
 
