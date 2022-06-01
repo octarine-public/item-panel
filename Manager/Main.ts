@@ -84,7 +84,7 @@ export default class ItemPanelManager {
 
 				if (remaining > 0 && this.menu.CooldwnState.value) {
 
-					const text = remaining > 60
+					const text = this.menu.FormatTime.value && remaining >= 60
 						? Util.FormatTime(remaining)
 						: remaining < 10 ? remaining.toFixed(1) : Math.ceil(remaining).toFixed()
 
@@ -151,15 +151,26 @@ export default class ItemPanelManager {
 		}
 	}
 
-	public async OnAbilityChanged(abil: AbilityX, unit: UnitX, oldOwner: boolean) {
-		if (!abil.IsItem || abil.IsFake || !abil.CanDrawable)
+	public async OnUnitItemsChanged(unit: UnitX, abil?: AbilityX, transferred?: boolean) {
+		if (unit.IsIllusion)
 			return
-		const owner = abil.Owner
-		if (owner === undefined || !this.IsValidOwner(owner))
+		if (transferred && abil !== undefined) {
+			await this.OnAbilityChanged(abil, unit)
 			return
-		const model = this.units.get(unit)
-		if (model !== undefined)
-			oldOwner ? await model.OnAbilityDestroyed(abil) : await model.OnAbilityCreated(abil)
+		}
+		for (const item of unit.Abilities.filter(x => x.IsItem))
+			await this.OnAbilityCreated(item)
+	}
+
+	public async OnUnitAbilitiesChanged(unit: UnitX, abil?: AbilityX, transferred?: boolean) {
+		if (unit.IsIllusion)
+			return
+		if (transferred && abil !== undefined) {
+			await this.OnAbilityChanged(abil, unit)
+			return
+		}
+		for (const item of unit.Abilities.filter(x => !x.IsItem))
+			await this.OnAbilityCreated(item)
 	}
 
 	public OnMouseKeyDown(key: VMouseKeys) {
@@ -231,13 +242,37 @@ export default class ItemPanelManager {
 		this.menu.OnGameStarted()
 	}
 
+	protected async OnAbilityChanged(abil: AbilityX, unit: UnitX) {
+		if (!abil.IsItem || abil.IsFake || !abil.CanDrawable)
+			return
+		const owner = abil.Owner
+		if (owner === undefined)
+			return
+
+		if (!this.IsValidOwner(owner)) {
+			this.units.delete(owner)
+			await this.OnEntityDestroyed(owner)
+			return
+		}
+
+		const model = this.units.get(unit)
+		if (model !== undefined)
+			await model.OnAbilityDestroyed(abil)
+	}
+
 	protected async OnAbilityCreated(abil: AbilityX) {
 		if (!abil.IsItem || abil.IsFake || !abil.CanDrawable)
 			return
 
 		const owner = abil.Owner
-		if (owner === undefined || !this.IsValidOwner(owner))
+		if (owner === undefined)
 			return
+
+		if (!this.IsValidOwner(owner)) {
+			this.units.delete(owner)
+			await this.OnEntityDestroyed(owner)
+			return
+		}
 
 		let model = this.units.get(owner)
 		if (model === undefined) {
@@ -260,7 +295,7 @@ export default class ItemPanelManager {
 	}
 
 	protected IsValidOwner(owner: Nullable<UnitX>) {
-		return (owner instanceof SpiritBearX || owner instanceof HeroX || owner instanceof CourierX)
+		return (owner instanceof SpiritBearX || (owner instanceof HeroX && owner.IsImportant) || owner instanceof CourierX)
 			&& !owner.CommandRestricted
 	}
 

@@ -21,6 +21,7 @@ export default class MenuManager {
 	public EmptySlot: Menu.Toggle
 	public PositionX: Menu.Slider
 	public PositionY: Menu.Slider
+	public FormatTime: Menu.Toggle
 
 	protected IState: Menu.Toggle
 	protected Size: Menu.Slider
@@ -45,6 +46,7 @@ export default class MenuManager {
 		this.CooldwnState = this.Tree.AddToggle("ItemPanel_Cooldwn_State", true)
 		this.ChargeState = this.Tree.AddToggle("ItemPanel_Charge_State", true)
 		this.EmptySlot = this.Tree.AddToggle("ItemPanel_EmptySlot")
+		this.FormatTime = this.Tree.AddToggle("Cooldown format time", false, "Show cooldown format time (min:sec)")
 
 		const KeysTree = this.Tree.AddNode("ItemPanel_Keys")
 		this.HiddenItemTree = this.Tree.AddNode("Hide items")

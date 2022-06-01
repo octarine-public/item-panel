@@ -25,9 +25,8 @@ export default class UnitModel {
 	}
 
 	public OnPostDataUpdate() {
-		this.DrawInteraction.OnUpdateCallback<DrwableItems>(objData => {
-			objData.UpdateItems(this.Items)
-		})
+		this.DrawInteraction.OnUpdateCallback<DrwableItems>(class_ =>
+			class_.UpdateItems(this.Items))
 	}
 
 	public async OnAbilityCreated(abil: AbilityX) {
@@ -86,7 +85,7 @@ export default class UnitModel {
 		for (const abil of orderBy) {
 			if (!abil.ShouldDisplayItem(costValue, passiveState) || this.menu.HiddenItems.IsEnabled(abil.Name))
 				continue
-			if (!backPackState && abil.IsBackPack || !(allyState || abil.Owner?.IsEnemy()))
+			if ((!backPackState && abil.IsBackPack) || !(allyState || abil.Owner?.IsEnemy()))
 				continue
 			arr.push(abil)
 		}

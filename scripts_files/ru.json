@@ -14,5 +14,7 @@
 	"ItemPanel_PingClick": "Оповещения",
 	"ItemPanel_Drag": "< Перенести >",
 	"Hide items": "Скрыть предметы",
-	"Couriers": "Курьеры"
+	"Couriers": "Курьеры",
+	"Cooldown format time": "Перезарядка формат. времени",
+	"Show cooldown format time (min:sec)": "Показывать время в формате (минуты:секунды)"
 }

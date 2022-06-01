@@ -24,14 +24,17 @@ InputEventSDK.on("MouseKeyUp", key =>
 InputEventSDK.on("MouseKeyDown", key =>
 	IManager.OnMouseKeyDown(key))
 
-EventsX.on("EntityCreated", entity =>
+EventsX.on("EntityCreated", async entity =>
 	IManager.OnEntityCreated(entity))
 
-EventsX.on("LifeStateChanged", entity =>
+EventsX.on("LifeStateChanged", async entity =>
 	IManager.OnLifeStateChanged(entity))
 
-EventsX.on("EntityDestroyed", entity =>
+EventsX.on("EntityDestroyed", async entity =>
 	IManager.OnEntityDestroyed(entity))
 
-EventsX.on("AbilityChanged", (abil, unit, oldOwner) =>
-	IManager.OnAbilityChanged(abil, unit, oldOwner))
+EventsX.on("UnitAbilitiesChanged", async (unit, abil, transferred) =>
+	IManager.OnUnitAbilitiesChanged(unit, abil, transferred))
+
+EventsX.on("UnitItemsChanged", async (unit, abil, transferred) =>
+	IManager.OnUnitItemsChanged(unit, abil, transferred))
