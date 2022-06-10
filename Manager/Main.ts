@@ -174,7 +174,7 @@ export default class ItemPanelManager {
 	}
 
 	public OnMouseKeyDown(key: VMouseKeys) {
-		if (!this.IsValidInput(key) || !this.menu.PingClick.value)
+		if (!this.IsValidInput(key))
 			return true
 
 		const HeroSize = this.menu.HeroSize
@@ -190,7 +190,11 @@ export default class ItemPanelManager {
 		if (Input.CursorOnScreen.IsUnderRectangle(panelPosition.x, panelPosition.y, HeroSize.x, HeroSize.y)) {
 			this.dirtyPosition = true
 			this.mouseOnPanel.CopyFrom(Input.CursorOnScreen.Subtract(this.HeroPosition))
+			return false
 		}
+
+		if (!this.menu.PingClick.value)
+			return true
 
 		const rect = new RectangleX(panelPosition, SizePosition)
 		if (!rect.Contains(CursorOnScreen))
@@ -226,7 +230,7 @@ export default class ItemPanelManager {
 	}
 
 	public OnMouseKeyUp(key: VMouseKeys) {
-		if (!this.IsValidInput(key) || !this.menu.PingClick.value)
+		if (!this.IsValidInput(key))
 			return true
 		this.dirtyPosition = false
 		return true
