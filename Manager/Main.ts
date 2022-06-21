@@ -1,17 +1,20 @@
 import { AbilityX, CourierX, EntityManagerX, EntityX, FlagText, HeroX, PathX, RectangleX, SpiritBearX, UnitX, Util } from "immortal-core/Imports"
 import { ArrayExtensions, Color, DOTAGameUIState_t, DOTA_GameState, GameRules, GameState, Input, Menu, RendererSDK, Vector2, VMouseKeys } from "wrapper/Imports"
 import { MapDrawable } from "../Drawable/Index"
+import DrwableUnit from "../Drawable/Items"
 import { KeyMode } from "../Enum/KeyMode"
-import { DrawItems } from "../ITypes"
+import ItemModel from "../Models/Items"
 import UnitModel from "../Models/Unit"
 import MenuManager from "./Menu"
 
 export default class ItemPanelManager {
 
+	private TotalItems = 0
 	private dirtyPosition = false
 	private mouseOnPanel = new Vector2()
 	private HeroPosition = new Vector2()
-	private units = new Map<UnitX, UnitModel>()
+	private DrwableUnits: DrwableUnit[] = []
+	private readonly units = new Map<UnitX, UnitModel>()
 
 	constructor(protected menu: MenuManager) { }
 
@@ -23,7 +26,7 @@ export default class ItemPanelManager {
 		const keyState = (this.menu.ModeKey.selected_id === KeyMode.Toggled && !this.menu.IsToggled)
 			|| (this.menu.ModeKey.selected_id === KeyMode.Pressed && !this.menu.ToggleKey.is_pressed)
 
-		if (keyState)
+		if (keyState || this.TotalItems === 0)
 			return
 
 		const HeroSize = this.menu.HeroSize
@@ -32,17 +35,14 @@ export default class ItemPanelManager {
 		const panelPosDraw = panel.Clone()
 		const mousePos = Input.CursorOnScreen
 
-		const sort = ArrayExtensions.orderBy([...MapDrawable.values()], x => !x.IsHero)
 		const IsHover = mousePos.IsUnderRectangle(panel.x, panel.y, HeroSize.x, HeroSize.y)
-
-		if (this.dirtyPosition && sort.length !== 0) {
-			Menu.Base.SaveConfigASAP = true
+		if (this.dirtyPosition) {
 			panel.CopyFrom(mousePos.Subtract(this.mouseOnPanel))
 			this.menu.PositionX.value = panel.Round(1).x
 			this.menu.PositionY.value = panel.Round(1).y
 		}
 
-		for (const unit of sort) {
+		for (const unit of this.DrwableUnits) {
 
 			const items = unit.Items
 			if (items.length === 0 || (!this.menu.CouriersState.value && unit.IsCourier))
@@ -65,35 +65,38 @@ export default class ItemPanelManager {
 
 			for (let index = items.length - 1; index > -1; index--) {
 
-				const [texture, charge, remaining, isTpScroll, isTravelBoots, cooldown_ratio, , isMuted, , IsBackPack] = items[index]
+				const item = items[index]
 
-				if ((isTpScroll || isTravelBoots) && unit.IsHero) {
+				if ((item.IsTpScroll || item.IsTravelBoots) && unit.IsHero) {
+
 					const [position, size] = this.RightPositionUnit(ItemSize, HeroSize, panel)
 					const rectPosition = new RectangleX(position, size)
 					const height = Math.round(rectPosition.Height / 5)
-					RectangleX.Image(texture, rectPosition, Color.White, 0, IsHover)
-					if (remaining > 0)
-						RendererSDK.Arc(-90, cooldown_ratio, rectPosition.pos1, rectPosition.pos2, false, height, Color.Red)
+					RectangleX.Image(item.TexturePath, rectPosition, Color.White, 0)
+
+					if (item.RemainingCooldown > 0)
+						RendererSDK.Arc(-90, item.PercentRemainingCooldown, rectPosition.pos1, rectPosition.pos2, false, height, Color.Red)
+
 					continue
 				}
 
 				const items_position_2 = items_position.Clone()
 					.SubtractSize(items_position.Height / 10)
 
-				RectangleX.Image(texture, items_position_2, Color.White, -1, isMuted || IsHover || IsBackPack)
+				RectangleX.Image(item.TexturePath, items_position_2, Color.White, -1, item.IsMuted || IsHover || item.IsBackPack)
 
-				if (remaining > 0 && this.menu.CooldwnState.value) {
+				if (item.RemainingCooldown > 0 && this.menu.CooldwnState.value) {
 
-					const text = this.menu.FormatTime.value && remaining >= 60
-						? Util.FormatTime(remaining)
-						: remaining < 10 ? remaining.toFixed(1) : Math.ceil(remaining).toFixed()
+					const text = this.menu.FormatTime.value && item.RemainingCooldown >= 60
+						? Util.FormatTime(item.RemainingCooldown)
+						: item.RemainingCooldown < 10 ? item.RemainingCooldown.toFixed(1) : Math.ceil(item.RemainingCooldown).toFixed()
 
 					RectangleX.Image(PathX.Images.softedge_horizontal, items_position_2, Color.Black.SetA(165))
 					RectangleX.Text(text, items_position_2, Color.White, 1.65)
 				}
 
-				if (remaining <= 0 && charge !== 0 && this.menu.ChargeState.value)
-					RectangleX.Text(charge.toFixed(), items_position_2, Color.White, 2, FlagText.BOT_RIGHT, {
+				if (item.RemainingCooldown <= 0 && item.Charges !== 0 && this.menu.ChargeState.value)
+					RectangleX.Text(item.Charges.toFixed(), items_position_2, Color.White, 2, FlagText.BOT_RIGHT, {
 						filedRect: true,
 					})
 
@@ -119,6 +122,10 @@ export default class ItemPanelManager {
 
 		if (!this.menu.State)
 			return
+
+		const arr = [...MapDrawable.values()]
+		this.TotalItems = this.Reduce(arr)
+		this.DrwableUnits = ArrayExtensions.orderBy(arr, x => !x.IsHero)
 
 		for (const [, model] of this.units)
 			model.OnPostDataUpdate()
@@ -174,7 +181,7 @@ export default class ItemPanelManager {
 	}
 
 	public OnMouseKeyDown(key: VMouseKeys) {
-		if (!this.IsValidInput(key))
+		if (!this.IsValidInput(key) || this.TotalItems === 0)
 			return true
 
 		const HeroSize = this.menu.HeroSize
@@ -202,23 +209,22 @@ export default class ItemPanelManager {
 
 		const sort = ArrayExtensions.orderBy([...MapDrawable.values()], x => !x.IsHero)
 
-		if (sort.length === 0)
-			return true
-
 		for (const unit of sort) {
 			const items = unit.Items
 			if (items.length === 0)
 				continue
+
 			const vSize = new Vector2(panelPosition.x + HeroSize.x, panelPosition.y)
 			const items_position = new RectangleX(vSize, ItemSize)
+
 			for (let index = items.length - 1; index > -1; index--) {
-				const [, , , isTpScroll, isTravelBoots, , , , handle] = items[index]
-				if ((isTpScroll || isTravelBoots) && unit.IsHero)
+				const item = items[index]
+				if ((item.IsTownPortalScroll || item.IsTravelBoots) && unit.IsHero)
 					continue
 				const items_position_2 = items_position.Clone()
 					.SubtractSize(items_position.Height / 10)
 				if (items_position_2.Contains(CursorOnScreen)) {
-					EntityManagerX.GetEntity(handle, AbilityX)?.PingAbility()
+					EntityManagerX.GetEntity(item.Handle, AbilityX)?.PingAbility()
 					return false
 				}
 				items_position.pos1.AddScalarX(ItemSize.x)
@@ -233,10 +239,16 @@ export default class ItemPanelManager {
 		if (!this.IsValidInput(key))
 			return true
 		this.dirtyPosition = false
+		Menu.Base.SaveConfigASAP = true
+		const panel = this.menu.GetItemPanelPos
+		this.menu.PositionX.value = panel.Round(1).x
+		this.menu.PositionY.value = panel.Round(1).y
 		return true
 	}
 
 	public async OnGameEnded() {
+		this.TotalItems = 0
+		this.DrwableUnits = []
 		this.dirtyPosition = false
 		await this.menu.OnGameEnded()
 	}
@@ -291,7 +303,7 @@ export default class ItemPanelManager {
 		if (!abil.IsItem || abil.IsFake || !abil.CanDrawable)
 			return
 		const owner = abil.Owner
-		if (owner === undefined)
+		if (owner === undefined || !this.IsValidOwner(owner))
 			return
 		const model = this.units.get(owner)
 		if (model !== undefined)
@@ -303,10 +315,10 @@ export default class ItemPanelManager {
 			|| (owner instanceof HeroX && owner.IsImportant) || owner instanceof CourierX) && !owner.CommandRestricted
 	}
 
-	protected DrawEmptySlots(ItemSize: Vector2, position: RectangleX, items: DrawItems[]) {
+	protected DrawEmptySlots(ItemSize: Vector2, position: RectangleX, items: ItemModel[]) {
 		const renderCount = this.menu.BackPackState.value ? 10 : 7
-		const isTravel = items.some(x => x[4] && !x[6])
-		const isTpScroll = items.some(x => x[3] && !x[6])
+		const isTravel = items.some(x => x.HasTravelBoots && !x.IsHero)
+		const isTpScroll = items.some(x => x.IsTpScroll && !x.IsHero)
 		for (let i = (this.menu.EmptySlot.value ? renderCount : (items.length - 1)) - (isTravel ? isTpScroll ? 2 : 1 : 1); i > -1; i--) {
 			const coutsPosition = position.Clone()
 			coutsPosition.pos1.AddScalarX(ItemSize.x * i)
@@ -323,5 +335,12 @@ export default class ItemPanelManager {
 	private IsValidInput(key: VMouseKeys) {
 		return key === VMouseKeys.MK_LBUTTON
 			&& GameState.UIState === DOTAGameUIState_t.DOTA_GAME_UI_DOTA_INGAME
+	}
+
+	private Reduce(arr: DrwableUnit[]) {
+		let length = 0
+		for (const unit of arr)
+			length += unit.Items.length
+		return length
 	}
 }
