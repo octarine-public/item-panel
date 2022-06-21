@@ -136,14 +136,19 @@ export default class ItemPanelManager {
 			await this.OnAbilityCreated(entity)
 	}
 
+	public async OnEntityChanged(entity: EntityX) {
+		if (!(entity instanceof UnitX) || !this.IsValidOwner(entity))
+			return
+		for (const abil of entity.Abilities.filter(x => x.IsItem))
+			await this.OnEntityCreated(abil)
+	}
+
 	public async OnLifeStateChanged(entity: EntityX) {
 		if (!(entity instanceof SpiritBearX))
 			return
 		const model = this.units.get(entity)
-		if (model !== undefined) {
+		if (model !== undefined)
 			await model.OnLifeStateChanged(entity, this.units)
-			return
-		}
 	}
 
 	public async OnEntityDestroyed(entity: EntityX) {
@@ -262,14 +267,8 @@ export default class ItemPanelManager {
 		if (!abil.IsItem || abil.IsFake || !abil.CanDrawable)
 			return
 		const owner = abil.Owner
-		if (owner === undefined)
+		if (owner === undefined || !this.IsValidOwner(owner))
 			return
-
-		if (!this.IsValidOwner(owner)) {
-			this.units.delete(owner)
-			await this.OnEntityDestroyed(owner)
-			return
-		}
 
 		const model = this.units.get(unit)
 		if (model !== undefined)
@@ -281,14 +280,8 @@ export default class ItemPanelManager {
 			return
 
 		const owner = abil.Owner
-		if (owner === undefined)
+		if (owner === undefined || !this.IsValidOwner(owner))
 			return
-
-		if (!this.IsValidOwner(owner)) {
-			this.units.delete(owner)
-			await this.OnEntityDestroyed(owner)
-			return
-		}
 
 		let model = this.units.get(owner)
 		if (model === undefined) {
@@ -312,7 +305,8 @@ export default class ItemPanelManager {
 
 	protected IsValidOwner(owner: Nullable<UnitX>) {
 		return (owner instanceof SpiritBearX
-			|| (owner instanceof HeroX && owner.IsImportant) || owner instanceof CourierX) && !owner.CommandRestricted
+			|| (owner instanceof HeroX && owner.IsImportant && !owner.IsClone) || owner instanceof CourierX)
+			&& !owner.CommandRestricted
 	}
 
 	protected DrawEmptySlots(ItemSize: Vector2, position: RectangleX, items: ItemModel[]) {
