@@ -7,12 +7,15 @@ export default class DrawInteraction {
 
 	constructor(protected unit: UnitX) { }
 
-	public get Has() {
-		return MapDrawable.has(this.KeyName)
-	}
-
 	protected get KeyName() {
 		return `${this.unit.Handle}_${this.unit.Name}`
+	}
+
+	public Has(unit?: UnitX) {
+		const key = unit === undefined
+			? this.KeyName
+			: this.KeyNameUnit(unit)
+		return MapDrawable.has(key)
 	}
 
 	public Set<T extends IDrwableUnit>(class_: Constructor<DrwableItems>, option: T) {
@@ -24,11 +27,14 @@ export default class DrawInteraction {
 		return getDraw as Nullable<T>
 	}
 
-	public Delete<T extends DrwableItems>() {
-		const getDraw = MapDrawable.get(this.KeyName)
+	public Delete<T extends DrwableItems>(unit?: UnitX) {
+		const key = unit === undefined
+			? this.KeyName
+			: this.KeyNameUnit(unit)
+		const getDraw = MapDrawable.get(key)
 		if (getDraw === undefined)
 			return undefined
-		MapDrawable.delete(this.KeyName)
+		MapDrawable.delete(key)
 		return getDraw as T
 	}
 
@@ -36,5 +42,9 @@ export default class DrawInteraction {
 		const getDraw = MapDrawable.get(this.KeyName)
 		if (getDraw !== undefined)
 			callback(getDraw as T)
+	}
+
+	protected KeyNameUnit(unit: UnitX) {
+		return `${unit.Handle}_${unit.Name}`
 	}
 }
