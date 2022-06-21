@@ -291,7 +291,7 @@ export default class ItemPanelManager {
 		if (!abil.IsItem || abil.IsFake || !abil.CanDrawable)
 			return
 		const owner = abil.Owner
-		if (owner === undefined || !this.IsValidOwner(owner))
+		if (owner === undefined)
 			return
 		const model = this.units.get(owner)
 		if (model !== undefined)
@@ -299,8 +299,8 @@ export default class ItemPanelManager {
 	}
 
 	protected IsValidOwner(owner: Nullable<UnitX>) {
-		return (owner instanceof SpiritBearX || (owner instanceof HeroX && owner.IsImportant) || owner instanceof CourierX)
-			&& !owner.CommandRestricted
+		return (owner instanceof SpiritBearX
+			|| (owner instanceof HeroX && owner.IsImportant) || owner instanceof CourierX) && !owner.CommandRestricted
 	}
 
 	protected DrawEmptySlots(ItemSize: Vector2, position: RectangleX, items: DrawItems[]) {
