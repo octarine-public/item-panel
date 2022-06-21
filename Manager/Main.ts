@@ -151,7 +151,7 @@ export default class ItemPanelManager {
 			return
 		const model = this.units.get(entity)
 		if (model !== undefined)
-			await model.OnLifeStateChanged(entity, this.units)
+			await model.OnLifeStateChanged()
 	}
 
 	public async OnEntityDestroyed(entity: EntityX) {

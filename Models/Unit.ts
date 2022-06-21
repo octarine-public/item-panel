@@ -45,17 +45,13 @@ export default class UnitModel {
 		this.DrawInteraction.Delete()
 	}
 
-	public async OnLifeStateChanged(unit: UnitX, models: Map<UnitX, UnitModel>) {
-		if (!unit.IsAlive) {
-			this.DrawInteraction.Delete()
-			models.delete(this.Unit)
+	/** restart bear */
+	public async OnLifeStateChanged() {
+		if (!this.Unit.IsAlive) {
+			this.OnEntityDestroyed()
 			return
 		}
-		const getDraw = this.DrawInteraction.Get()
-		if (getDraw === undefined) {
-			this.CreateDraw()
-			return
-		}
+		this.CreateDraw()
 	}
 
 	protected OrderBy(models: ItemModel[], allyState: boolean) {
@@ -78,7 +74,7 @@ export default class UnitModel {
 
 	protected CreateDraw() {
 
-		if (this.DrawInteraction.Has)
+		if (this.DrawInteraction.Has())
 			return
 
 		let ownerName = this.Unit.Name
