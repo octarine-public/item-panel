@@ -19,8 +19,11 @@ export default class MenuManager {
 	public CooldwnState: Menu.Toggle
 	public ChargeState: Menu.Toggle
 	public EmptySlot: Menu.Toggle
-	public PositionX: Menu.Slider
-	public PositionY: Menu.Slider
+	public Position: {
+		X: Menu.Slider
+		Y: Menu.Slider
+		Vector: Vector2
+	}
 	public FormatTime: Menu.Toggle
 
 	protected IState: Menu.Toggle
@@ -71,8 +74,7 @@ export default class MenuManager {
 		const SettingsTree = this.Tree.AddNode("Settings")
 
 		this.Size = SettingsTree.AddSlider("Size", 35, 20, 60)
-		this.PositionX = SettingsTree.AddSlider("Position: X", 100, 0, 1920)
-		this.PositionY = SettingsTree.AddSlider("Position: Y", 100, 0, 1080)
+		this.Position = this.Tree.AddVector2("Position", new Vector2(100, 100), new Vector2(0, 0), new Vector2(1920, 1080))
 
 		this.ToggleKey.OnRelease(() => this.IsToggled = !this.IsToggled)
 	}
@@ -83,8 +85,8 @@ export default class MenuManager {
 
 	public get GetItemPanelPos() {
 		return new Vector2(
-			GUIInfo.ScaleWidth(this.PositionX.value),
-			GUIInfo.ScaleHeight(this.PositionY.value),
+			GUIInfo.ScaleWidth(this.Position.X.value),
+			GUIInfo.ScaleHeight(this.Position.Y.value),
 		)
 	}
 

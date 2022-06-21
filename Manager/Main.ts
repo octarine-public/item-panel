@@ -1,5 +1,5 @@
 import { AbilityX, CourierX, EntityManagerX, EntityX, FlagText, HeroX, PathX, RectangleX, SpiritBearX, UnitX, Util } from "immortal-core/Imports"
-import { ArrayExtensions, Color, DOTAGameUIState_t, DOTA_GameState, GameRules, GameState, Input, Menu, RendererSDK, Vector2, VMouseKeys } from "wrapper/Imports"
+import { ArrayExtensions, Color, DOTAGameUIState_t, DOTA_GameState, GameRules, GameState, GUIInfo, Input, Menu, RendererSDK, Vector2, VMouseKeys } from "wrapper/Imports"
 import { MapDrawable } from "../Drawable/Index"
 import DrwableUnit from "../Drawable/Items"
 import { KeyMode } from "../Enum/KeyMode"
@@ -38,8 +38,11 @@ export default class ItemPanelManager {
 		const IsHover = mousePos.IsUnderRectangle(panel.x, panel.y, HeroSize.x, HeroSize.y)
 		if (this.dirtyPosition) {
 			panel.CopyFrom(mousePos.Subtract(this.mouseOnPanel))
-			this.menu.PositionX.value = panel.Round(1).x
-			this.menu.PositionY.value = panel.Round(1).y
+			this.menu.Position.Vector = panel
+				.Clone()
+				.DivideScalarX(GUIInfo.GetWidthScale())
+				.DivideScalarY(GUIInfo.GetHeightScale())
+				.RoundForThis(1)
 		}
 
 		for (const unit of this.DrwableUnits) {
@@ -246,8 +249,11 @@ export default class ItemPanelManager {
 		this.dirtyPosition = false
 		Menu.Base.SaveConfigASAP = true
 		const panel = this.menu.GetItemPanelPos
-		this.menu.PositionX.value = panel.Round(1).x
-		this.menu.PositionY.value = panel.Round(1).y
+		this.menu.Position.Vector = panel
+			.Clone()
+			.DivideScalarX(GUIInfo.GetWidthScale())
+			.DivideScalarY(GUIInfo.GetHeightScale())
+			.RoundForThis(1)
 		return true
 	}
 
