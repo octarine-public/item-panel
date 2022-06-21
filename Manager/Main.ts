@@ -275,7 +275,6 @@ export default class ItemPanelManager {
 		const owner = abil.Owner
 		if (owner === undefined || !this.IsValidOwner(owner))
 			return
-
 		const model = this.units.get(unit)
 		if (model !== undefined)
 			await model.OnAbilityDestroyed(abil)
@@ -286,8 +285,13 @@ export default class ItemPanelManager {
 			return
 
 		const owner = abil.Owner
-		if (owner === undefined || !this.IsValidOwner(owner))
+		if (owner === undefined)
 			return
+
+		if (!this.IsValidOwner(owner)) {
+			await this.OnEntityDestroyed(owner)
+			return
+		}
 
 		let model = this.units.get(owner)
 		if (model === undefined) {
