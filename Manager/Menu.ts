@@ -22,7 +22,7 @@ export default class MenuManager {
 	public Position: {
 		X: Menu.Slider
 		Y: Menu.Slider
-		Vector: Vector2
+		Vector: Vector2,
 	}
 	public FormatTime: Menu.Toggle
 
@@ -74,7 +74,7 @@ export default class MenuManager {
 		const SettingsTree = this.Tree.AddNode("Settings")
 
 		this.Size = SettingsTree.AddSlider("Size", 35, 20, 60)
-		this.Position = this.Tree.AddVector2("Position", new Vector2(100, 100), new Vector2(0, 0), new Vector2(1920, 1080))
+		this.Position = this.Tree.AddVector2("Settings", new Vector2(100, 100), new Vector2(0, 0), new Vector2(1920, 1080))
 
 		this.ToggleKey.OnRelease(() => this.IsToggled = !this.IsToggled)
 	}
