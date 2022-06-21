@@ -27,6 +27,9 @@ InputEventSDK.on("MouseKeyDown", key =>
 EventsX.on("EntityCreated", async entity =>
 	IManager.OnEntityCreated(entity))
 
+EventsX.on("EntityChanged", async entity =>
+	IManager.OnEntityChanged(entity))
+
 EventsX.on("LifeStateChanged", async entity =>
 	IManager.OnLifeStateChanged(entity))
 

@@ -1,9 +1,9 @@
-import { DrawItems } from "../ITypes"
+import ItemModel from "../Models/Items"
 
 export interface IDrwableUnit {
 	images: string
 	isHero: boolean,
-	items: DrawItems[]
+	items: ItemModel[]
 	ownerImages: string
 	isCourier: boolean
 }
@@ -32,7 +32,7 @@ export default class DrwableUnit {
 		return this.option.ownerImages
 	}
 
-	public UpdateItems(newItems: DrawItems[]) {
+	public UpdateItems(newItems: ItemModel[]) {
 		this.option.items = newItems
 	}
 }

@@ -2,7 +2,6 @@ import { AbilityX, CourierX, HeroX, PathX, PlayerX, UnitX } from "immortal-core/
 import { ArrayExtensions } from "wrapper/Imports"
 import DrawInteraction from "../Drawable/Index"
 import DrwableItems, { IDrwableUnit } from "../Drawable/Items"
-import { DrawItems } from "../ITypes"
 import MenuManager from "../Manager/Menu"
 import ItemModel from "./Items"
 
@@ -59,21 +58,6 @@ export default class UnitModel {
 		}
 	}
 
-	protected DrawTypeMap(models: ItemModel[]): DrawItems[] {
-		return models.map(model => [
-			model.TexturePath,
-			model.Charges,
-			model.RemainingCooldown,
-			model.IsTpScroll,
-			model.HasTravelBoots,
-			model.RemainingCooldown,
-			model.IsHero,
-			model.IsMuted,
-			model.Handle,
-			model.IsBackPack,
-		])
-	}
-
 	protected OrderBy(models: ItemModel[], allyState: boolean) {
 
 		const costValue = this.menu.CostValue.value
@@ -89,7 +73,7 @@ export default class UnitModel {
 				continue
 			arr.push(abil)
 		}
-		return this.DrawTypeMap(arr)
+		return arr
 	}
 
 	protected CreateDraw() {

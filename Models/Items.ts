@@ -4,8 +4,13 @@ import { DOTA_ABILITY_BEHAVIOR } from "wrapper/Imports"
 export default class ItemModel {
 
 	public IsEnabled = true
+	public IsTravelBoots = false
+	public IsTownPortalScroll = false
 
-	constructor(protected Item: AbilityX) { }
+	constructor(protected Item: AbilityX) {
+		this.IsTownPortalScroll = Item instanceof TownPortalScroll
+		this.IsTravelBoots = Item instanceof TravelBoots || Item instanceof TravelBoots2
+	}
 
 	public get Handle() {
 		return this.Item.Handle
@@ -28,13 +33,13 @@ export default class ItemModel {
 	}
 
 	public get IsTpScroll() {
-		if (!(this.Item instanceof TownPortalScroll))
+		if (!this.IsTownPortalScroll)
 			return false
 		return this.Item.IsUsable
 	}
 
 	public get HasTravelBoots() {
-		if (!(this.Item instanceof TravelBoots || this.Item instanceof TravelBoots2))
+		if (!this.IsTravelBoots)
 			return false
 		return this.Item.IsUsable
 	}
