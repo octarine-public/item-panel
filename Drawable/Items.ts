@@ -1,8 +1,10 @@
+import { Color } from "wrapper/Imports"
 import ItemModel from "../Models/Items"
 
 export interface IDrwableUnit {
 	images: string
-	isHero: boolean,
+	isHero: boolean
+	playerColor: Color
 	items: ItemModel[]
 	ownerImages: string
 	isCourier: boolean
@@ -22,6 +24,10 @@ export default class DrwableUnit {
 
 	public get IsHero() {
 		return this.option.isHero
+	}
+
+	public get PlayerColor() {
+		return this.option.playerColor
 	}
 
 	public get IsCourier() {

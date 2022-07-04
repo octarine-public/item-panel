@@ -90,6 +90,7 @@ export default class UnitModel {
 			images: PathX.Unit({ name: this.Unit.Name, team: this.Unit.Team }),
 			ownerImages: PathX.Unit({ name: ownerName, team: this.Unit.Team, iconSmall: true }),
 			isCourier: this.Unit instanceof CourierX,
+			playerColor: this.Unit.PlayerColor,
 		})
 	}
 }
