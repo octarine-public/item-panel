@@ -61,8 +61,10 @@ export default class ItemPanelManager {
 					const [position, size] = this.RightPositionUnit(ItemSize, HeroSize, panel)
 					RendererSDK.Image(unit.OwnerTextute, position, -1, size, Color.White, 0, undefined, IsHover)
 				}
-			} else
+			} else {
 				RendererSDK.Image(unit.Textute, panel, -1, HeroSize, Color.White, 0, undefined, IsHover)
+				RendererSDK.FilledRect(panel.Clone().SubtractScalarX(3), new Vector2(3, HeroSize.y), unit.PlayerColor.SetA(180))
+			}
 
 			this.DrawEmptySlots(ItemSize, items_position, items)
 
