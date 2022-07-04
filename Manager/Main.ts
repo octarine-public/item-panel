@@ -60,6 +60,7 @@ export default class ItemPanelManager {
 				if (!unit.OwnerTextute.includes("unknown_owner")) {
 					const [position, size] = this.RightPositionUnit(ItemSize, HeroSize, panel)
 					RendererSDK.Image(unit.OwnerTextute, position, -1, size, Color.White, 0, undefined, IsHover)
+					RendererSDK.FilledRect(panel.Clone().SubtractScalarX(3), new Vector2(3, HeroSize.y), (unit.IsEnemy ? Color.Red : Color.Green).SetA(180))
 				}
 			} else {
 				RendererSDK.Image(unit.Textute, panel, -1, HeroSize, Color.White, 0, undefined, IsHover)

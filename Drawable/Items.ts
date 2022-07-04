@@ -4,6 +4,7 @@ import ItemModel from "../Models/Items"
 export interface IDrwableUnit {
 	images: string
 	isHero: boolean
+	isEnemy: boolean
 	playerColor: Color
 	items: ItemModel[]
 	ownerImages: string
@@ -20,6 +21,10 @@ export default class DrwableUnit {
 
 	public get Textute() {
 		return this.option.images
+	}
+
+	public get IsEnemy() {
+		return this.option.isEnemy
 	}
 
 	public get IsHero() {
