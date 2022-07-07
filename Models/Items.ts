@@ -7,7 +7,11 @@ export default class ItemModel {
 	public IsTravelBoots = false
 	public IsTownPortalScroll = false
 
+	protected readonly TownPortalScroll: Nullable<TownPortalScroll>
+
 	constructor(protected Item: AbilityX) {
+		this.TownPortalScroll = Item.Owner
+			?.GetAbilityByClass(TownPortalScroll)
 		this.IsTownPortalScroll = Item instanceof TownPortalScroll
 		this.IsTravelBoots = Item instanceof TravelBoots || Item instanceof TravelBoots2
 	}
@@ -17,10 +21,16 @@ export default class ItemModel {
 	}
 
 	public get RemainingCooldown() {
+		if (this.IsTravelBoots)
+			return this.TownPortalScroll
+				?.RemainingCooldown ?? 0
 		return this.Item.RemainingCooldown
 	}
 
 	public get PercentRemainingCooldown() {
+		if (this.IsTravelBoots)
+			return this.TownPortalScroll
+				?.RemainingCooldown ?? 0
 		return this.Item.PercentRemainingCooldown
 	}
 

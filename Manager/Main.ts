@@ -323,10 +323,18 @@ export default class ItemPanelManager {
 	}
 
 	protected DrawEmptySlots(ItemSize: Vector2, position: RectangleX, items: ItemModel[]) {
-		const renderCount = this.menu.BackPackState.value ? 10 : 7
-		for (let i = (this.menu.EmptySlot.value ? renderCount : (items.length - 1)); i > -1; i--) {
-			position.pos1.AddScalarX(ItemSize.x * i)
-			RectangleX.Image(PathX.Images.empty_slot, position)
+		const IsTpScroll = items.some(item => item.IsTpScroll)
+
+		const renderCount = this.menu.BackPackState.value ? 9 : 6
+		const total = (this.menu.EmptySlot.value
+			? renderCount - (IsTpScroll ? 1 : 0)
+			: items.length - ((IsTpScroll ? 2 : 1))
+		)
+
+		for (let i = total; i > -1; i--) {
+			const newPos = position.Clone()
+			newPos.pos1.AddScalarX(ItemSize.x * i)
+			RectangleX.Image(PathX.Images.empty_slot, newPos)
 		}
 	}
 
