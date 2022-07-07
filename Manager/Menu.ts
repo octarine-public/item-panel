@@ -73,8 +73,8 @@ export default class MenuManager {
 
 		const SettingsTree = this.Tree.AddNode("Settings")
 
-		this.Size = SettingsTree.AddSlider("Size", 35, 20, 60)
-		this.Position = this.Tree.AddVector2("Settings", new Vector2(100, 100), new Vector2(0, 0), new Vector2(1920, 1080))
+		this.Size = SettingsTree.AddSlider("Size", 28, 20, 60)
+		this.Position = this.Tree.AddVector2("Settings", new Vector2(10, 654), new Vector2(0, 0), new Vector2(1920, 1080))
 
 		this.ToggleKey.OnRelease(() => this.IsToggled = !this.IsToggled)
 	}
