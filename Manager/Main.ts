@@ -73,7 +73,7 @@ export default class ItemPanelManager {
 
 				const item = items[index]
 
-				if ((item.IsTpScroll || item.IsTravelBoots) && unit.IsHero) {
+				if (item.IsTpScroll && unit.IsHero) {
 
 					const [position, size] = this.RightPositionUnit(ItemSize, HeroSize, panel)
 					const rectPosition = new RectangleX(position, size)
@@ -324,12 +324,9 @@ export default class ItemPanelManager {
 
 	protected DrawEmptySlots(ItemSize: Vector2, position: RectangleX, items: ItemModel[]) {
 		const renderCount = this.menu.BackPackState.value ? 10 : 7
-		const isTravel = items.some(x => x.HasTravelBoots && !x.IsHero)
-		const isTpScroll = items.some(x => x.IsTpScroll && !x.IsHero)
-		for (let i = (this.menu.EmptySlot.value ? renderCount : (items.length - 1)) - (isTravel ? isTpScroll ? 2 : 1 : 1); i > -1; i--) {
-			const coutsPosition = position.Clone()
-			coutsPosition.pos1.AddScalarX(ItemSize.x * i)
-			RectangleX.Image(PathX.Images.empty_slot, coutsPosition)
+		for (let i = (this.menu.EmptySlot.value ? renderCount : (items.length - 1)); i > -1; i--) {
+			position.pos1.AddScalarX(ItemSize.x * i)
+			RectangleX.Image(PathX.Images.empty_slot, position)
 		}
 	}
 
