@@ -26,9 +26,6 @@ export default class ItemModel {
 	}
 
 	public get PercentRemainingCooldown() {
-		if (this.IsTravelBoots)
-			return this.Owner?.GetAbilityByClass(TownPortalScroll)
-				?.PercentRemainingCooldown ?? 0
 		return this.Item.PercentRemainingCooldown
 	}
 
