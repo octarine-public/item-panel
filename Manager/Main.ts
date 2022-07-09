@@ -319,7 +319,6 @@ export default class ItemPanelManager {
 	protected IsValidOwner(owner: Nullable<UnitX>) {
 		return (owner instanceof SpiritBearX
 			|| (owner instanceof HeroX && owner.IsImportant && !owner.IsClone) || owner instanceof CourierX)
-			&& !owner.CommandRestricted
 	}
 
 	protected DrawEmptySlots(ItemSize: Vector2, position: RectangleX, items: ItemModel[]) {
