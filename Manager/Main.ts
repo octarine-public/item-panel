@@ -192,24 +192,24 @@ export default class ItemPanelManager {
 	}
 
 	public OnMouseKeyDown(key: VMouseKeys) {
-		if (!this.IsValidInput(key) || this.TotalItems === 0)
+		if (!this.IsValidInput(key) || this.dirtyPosition || this.TotalItems === 0)
 			return true
 
 		const HeroSize = this.menu.HeroSize
-		const ItemSize = this.menu.ItemSize
-		const panelPosition = this.menu.GetItemPanelPos
 		const CursorOnScreen = Input.CursorOnScreen
+		const panelPosition = this.menu.GetItemPanelPos
 
+		if (CursorOnScreen.IsUnderRectangle(panelPosition.x, panelPosition.y, HeroSize.x, HeroSize.y)) {
+			this.dirtyPosition = true
+			this.mouseOnPanel.CopyFrom(CursorOnScreen.Subtract(this.HeroPosition))
+			return false
+		}
+
+		const ItemSize = this.menu.ItemSize
 		const SizePosition = new Vector2(
 			HeroSize.x + ItemSize.x * 7,
 			HeroSize.y * this.units.size,
 		)
-
-		if (Input.CursorOnScreen.IsUnderRectangle(panelPosition.x, panelPosition.y, HeroSize.x, HeroSize.y)) {
-			this.dirtyPosition = true
-			this.mouseOnPanel.CopyFrom(Input.CursorOnScreen.Subtract(this.HeroPosition))
-			return false
-		}
 
 		if (!this.menu.PingClick.value)
 			return true
@@ -247,7 +247,7 @@ export default class ItemPanelManager {
 	}
 
 	public OnMouseKeyUp(key: VMouseKeys) {
-		if (!this.IsValidInput(key))
+		if (!this.IsValidInput(key) || !this.dirtyPosition)
 			return true
 		this.dirtyPosition = false
 		Menu.Base.SaveConfigASAP = true
