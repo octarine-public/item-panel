@@ -145,12 +145,10 @@ export default class ItemPanelManager {
 	public async OnEntityChanged(entity: EntityX) {
 		if (!(entity instanceof UnitX))
 			return
-
 		if (!this.IsValidOwner(entity)) {
 			await this.OnEntityDestroyed(entity)
 			return
 		}
-
 		for (const abil of entity.Abilities.filter(x => x.IsItem))
 			await this.OnEntityCreated(abil)
 	}
@@ -327,8 +325,8 @@ export default class ItemPanelManager {
 	}
 
 	protected IsValidOwner(owner: Nullable<UnitX>) {
-		return (owner instanceof SpiritBearX || owner instanceof HeroX || owner instanceof CourierX)
-			&& owner.IsImportant && !owner.IsClone
+		return (owner instanceof SpiritBearX
+			|| (owner instanceof HeroX && owner.IsImportant && !owner.IsClone) || owner instanceof CourierX)
 	}
 
 	protected DrawEmptySlots(ItemSize: Vector2, position: RectangleX, items: ItemModel[]) {
