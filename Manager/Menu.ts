@@ -44,7 +44,7 @@ export default class MenuManager {
 
 		this.AllyState = this.Tree.AddToggle("Ally")
 		this.CouriersState = this.Tree.AddToggle("Couriers")
-		this.BackPackState = this.Tree.AddToggle("Backpack", true)
+		this.BackPackState = this.Tree.AddToggle("Backpack")
 		this.PingClick = this.Tree.AddToggle("ItemPanel_PingClick2", false)
 		this.CooldwnState = this.Tree.AddToggle("ItemPanel_Cooldwn_State", true)
 		this.ChargeState = this.Tree.AddToggle("ItemPanel_Charge_State", true)
