@@ -1,4 +1,4 @@
-import { Menu, Utils } from "wrapper/Imports"
+import { Menu, Utils } from "github.com/octarine-public/wrapper/wrapper/Imports"
 
 const base = "github.com/octarine-public/item-panel/scripts_files"
 const Load = (name: string) => {

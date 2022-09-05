@@ -1,5 +1,5 @@
-import { AbilityX } from "immortal-core/Imports"
-import { ArrayExtensions, GUIInfo, Menu, Vector2 } from "wrapper/Imports"
+import { AbilityX } from "github.com/octarine-private/immortal-core/Imports"
+import { ArrayExtensions, GUIInfo, Menu, Vector2 } from "github.com/octarine-public/wrapper/wrapper/Imports"
 
 export default class MenuManager {
 
