@@ -1,5 +1,5 @@
 import { AbilityX, CourierX, EntityManagerX, EntityX, FlagText, HeroX, PathX, RectangleX, SpiritBearX, UnitX, Util } from "github.com/octarine-private/immortal-core/Imports"
-import { ArrayExtensions, Color, DOTAGameUIState_t, DOTA_GameState, GameRules, GameState, GUIInfo, Input, Menu, RendererSDK, Vector2, VMouseKeys } from "github.com/octarine-public/wrapper/wrapper/Imports"
+import { ArrayExtensions, Color, DOTAGameUIState_t, DOTA_GameState, GameRules, GameState, GUIInfo, Input, Menu, Rectangle, RendererSDK, Vector2, VMouseKeys } from "github.com/octarine-public/wrapper/wrapper/Imports"
 import { MapDrawable } from "../Drawable/Index"
 import DrwableUnit from "../Drawable/Items"
 import { KeyMode } from "../Enum/KeyMode"
@@ -18,6 +18,11 @@ export default class ItemPanelManager {
 
 	constructor(protected menu: MenuManager) { }
 
+	private get IsValidShop() {
+		return GUIInfo.OpenShopLarge !== undefined
+			&& GUIInfo.OpenShopMini !== undefined
+	}
+
 	public OnDraw() {
 
 		if (!this.menu.State || GameState.UIState !== DOTAGameUIState_t.DOTA_GAME_UI_DOTA_INGAME)
@@ -34,6 +39,23 @@ export default class ItemPanelManager {
 		const panel = this.menu.GetItemPanelPos
 		const panelPosDraw = panel.Clone()
 		const mousePos = Input.CursorOnScreen
+
+		const isValidShop = this.IsValidShop
+		if ((Input.IsShopOpen || Input.IsScoreboardOpen) && isValidShop && (
+			this.IsOpenHud(GUIInfo.OpenShopMini.Items) ||
+			this.IsOpenHud(GUIInfo.OpenShopMini.Header) ||
+			this.IsOpenHud(GUIInfo.OpenShopMini.GuideFlyout) ||
+			this.IsOpenHud(GUIInfo.OpenShopMini.ItemCombines) ||
+			this.IsOpenHud(GUIInfo.OpenShopMini.PinnedItems) ||
+
+			this.IsOpenHud(GUIInfo.OpenShopLarge.Items) ||
+			this.IsOpenHud(GUIInfo.OpenShopLarge.Header) ||
+			this.IsOpenHud(GUIInfo.OpenShopLarge.GuideFlyout) ||
+			this.IsOpenHud(GUIInfo.OpenShopLarge.PinnedItems) ||
+			this.IsOpenHud(GUIInfo.OpenShopLarge.ItemCombines) ||
+			this.IsOpenHud(GUIInfo.Scoreboard.Background)
+		))
+			return
 
 		const IsHover = mousePos.IsUnderRectangle(panel.x, panel.y, HeroSize.x, HeroSize.y)
 		if (this.dirtyPosition) {
@@ -361,5 +383,9 @@ export default class ItemPanelManager {
 		for (const unit of arr)
 			length += unit.Items.length
 		return length
+	}
+
+	private IsOpenHud(position: Rectangle) {
+		return position.Contains(this.menu.GetItemPanelPos)
 	}
 }
