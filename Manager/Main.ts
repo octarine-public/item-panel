@@ -41,20 +41,20 @@ export default class ItemPanelManager {
 		const mousePos = Input.CursorOnScreen
 
 		const isValidShop = this.IsValidShop
-		if ((Input.IsShopOpen || Input.IsScoreboardOpen) && isValidShop && (
-			this.IsOpenHud(GUIInfo.OpenShopMini.Items) ||
-			this.IsOpenHud(GUIInfo.OpenShopMini.Header) ||
-			this.IsOpenHud(GUIInfo.OpenShopMini.GuideFlyout) ||
-			this.IsOpenHud(GUIInfo.OpenShopMini.ItemCombines) ||
-			this.IsOpenHud(GUIInfo.OpenShopMini.PinnedItems) ||
+		if ((Input.IsScoreboardOpen && this.IsOpenHud(GUIInfo.Scoreboard.Background))
+			|| (Input.IsShopOpen && isValidShop && (
+				this.IsOpenHud(GUIInfo.OpenShopMini.Items) ||
+				this.IsOpenHud(GUIInfo.OpenShopMini.Header) ||
+				this.IsOpenHud(GUIInfo.OpenShopMini.GuideFlyout) ||
+				this.IsOpenHud(GUIInfo.OpenShopMini.ItemCombines) ||
+				this.IsOpenHud(GUIInfo.OpenShopMini.PinnedItems) ||
 
-			this.IsOpenHud(GUIInfo.OpenShopLarge.Items) ||
-			this.IsOpenHud(GUIInfo.OpenShopLarge.Header) ||
-			this.IsOpenHud(GUIInfo.OpenShopLarge.GuideFlyout) ||
-			this.IsOpenHud(GUIInfo.OpenShopLarge.PinnedItems) ||
-			this.IsOpenHud(GUIInfo.OpenShopLarge.ItemCombines) ||
-			this.IsOpenHud(GUIInfo.Scoreboard.Background)
-		))
+				this.IsOpenHud(GUIInfo.OpenShopLarge.Items) ||
+				this.IsOpenHud(GUIInfo.OpenShopLarge.Header) ||
+				this.IsOpenHud(GUIInfo.OpenShopLarge.GuideFlyout) ||
+				this.IsOpenHud(GUIInfo.OpenShopLarge.PinnedItems) ||
+				this.IsOpenHud(GUIInfo.OpenShopLarge.ItemCombines)
+			)))
 			return
 
 		const IsHover = mousePos.IsUnderRectangle(panel.x, panel.y, HeroSize.x, HeroSize.y)
