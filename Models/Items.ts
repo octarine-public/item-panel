@@ -1,5 +1,5 @@
-import { AbilitySlot, AbilityX, EntityX, TownPortalScroll, TravelBoots, TravelBoots2 } from "github.com/octarine-private/immortal-core/Imports"
-import { DOTA_ABILITY_BEHAVIOR } from "github.com/octarine-public/wrapper/wrapper/Imports"
+import { AbilitySlot, AbilityX, EntityX, TownPortalScroll, TravelBoots, TravelBoots2 } from "github.com/octarine-private/immortal-core/index"
+import { DOTA_ABILITY_BEHAVIOR } from "github.com/octarine-public/wrapper/index"
 
 export default class ItemModel {
 

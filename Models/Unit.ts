@@ -1,5 +1,5 @@
-import { AbilityX, CourierX, HeroX, PathX, PlayerX, UnitX } from "github.com/octarine-private/immortal-core/Imports"
-import { ArrayExtensions } from "github.com/octarine-public/wrapper/wrapper/Imports"
+import { AbilityX, CourierX, HeroX, PathX, PlayerX, UnitX } from "github.com/octarine-private/immortal-core/index"
+import { ArrayExtensions } from "github.com/octarine-public/wrapper/index"
 import DrawInteraction from "../Drawable/Index"
 import DrwableItems, { IDrwableUnit } from "../Drawable/Items"
 import MenuManager from "../Manager/Menu"

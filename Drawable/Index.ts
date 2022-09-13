@@ -1,4 +1,4 @@
-import { UnitX } from "github.com/octarine-private/immortal-core/Imports"
+import { UnitX } from "github.com/octarine-private/immortal-core/index"
 import DrwableItems, { IDrwableUnit } from "./Items"
 
 export const MapDrawable = new Map<string, DrwableItems>()

@@ -1,1 +1,1 @@
-export * from "github.com/octarine-private/immortal-core/Imports"
+export * from "github.com/octarine-private/immortal-core/index"

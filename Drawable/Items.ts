@@ -1,4 +1,4 @@
-import { Color } from "github.com/octarine-public/wrapper/wrapper/Imports"
+import { Color } from "github.com/octarine-public/wrapper/index"
 import ItemModel from "../Models/Items"
 
 export interface IDrwableUnit {

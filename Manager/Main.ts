@@ -1,5 +1,5 @@
-import { AbilityX, CourierX, EntityManagerX, EntityX, FlagText, HeroX, PathX, RectangleX, SpiritBearX, UnitX, Util } from "github.com/octarine-private/immortal-core/Imports"
-import { ArrayExtensions, Color, DOTAGameUIState_t, DOTA_GameState, GameRules, GameState, GUIInfo, Input, Menu, Rectangle, RendererSDK, Vector2, VMouseKeys } from "github.com/octarine-public/wrapper/wrapper/Imports"
+import { AbilityX, CourierX, EntityManagerX, EntityX, FlagText, HeroX, PathX, RectangleX, SpiritBearX, UnitX, Util } from "github.com/octarine-private/immortal-core/index"
+import { ArrayExtensions, Color, DOTAGameUIState_t, DOTA_GameState, GameRules, GameState, GUIInfo, Input, Menu, Rectangle, RendererSDK, Vector2, VMouseKeys } from "github.com/octarine-public/wrapper/index"
 import { MapDrawable } from "../Drawable/Index"
 import DrwableUnit from "../Drawable/Items"
 import { KeyMode } from "../Enum/KeyMode"

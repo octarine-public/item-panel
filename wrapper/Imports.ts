@@ -1,1 +1,1 @@
-export * from "github.com/octarine-public/wrapper/wrapper/Imports"
+export * from "github.com/octarine-public/wrapper/index"
