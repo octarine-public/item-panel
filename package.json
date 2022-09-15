@@ -1,6 +1,7 @@
 {
+	"version": "2.0.0",
 	"name": "item-panel",
-	"version": "1.0.0",
+	"main": "Bootstrap.ts",
 	"description": "Item panel",
 	"devDependencies": {
 		"tslint": "beta",
