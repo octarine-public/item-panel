@@ -4,6 +4,8 @@
     "typescript.format.semicolons": "remove",
     "typescript.tsdk": "node_modules\\typescript\\lib",
     "editor.codeActionsOnSave": {
+        "source.fixAll": true,
         "source.fixAll.tslint": true
-    }
+    },
+    "task.allowAutomaticTasks": "on"
 }

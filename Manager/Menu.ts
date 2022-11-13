@@ -104,7 +104,7 @@ export default class MenuManager {
 		)
 	}
 
-	public async OnAddItem(abil: AbilityX) {
+	public  OnAddItem(abil: AbilityX) {
 		if (this.CachedItemNames.includes(abil.Name))
 			return
 
@@ -121,7 +121,7 @@ export default class MenuManager {
 			this.HiddenItemsInfo.IsHidden = true
 
 		this.HiddenItems.values.push(abil.Name)
-		await this.HiddenItems.Update()
+		this.HiddenItems.Update()
 		this.CachedItemNames.push(abil.Name)
 	}
 
@@ -140,7 +140,7 @@ export default class MenuManager {
 			this.HiddenItemsInfo.IsHidden = true
 	}
 
-	public async OnGameEnded() {
+	public  OnGameEnded() {
 
 		if (!this.HiddenItems.IsHidden)
 			this.HiddenItems.IsHidden = true
@@ -156,7 +156,7 @@ export default class MenuManager {
 
 		for (const name of this.CachedItemNames) {
 			ArrayExtensions.arrayRemove(this.HiddenItems.values, name)
-			await this.HiddenItems.Update()
+			this.HiddenItems.Update()
 			ArrayExtensions.arrayRemove(this.CachedItemNames, name)
 		}
 	}

@@ -28,14 +28,14 @@ export default class UnitModel {
 			class_.UpdateItems(this.Items))
 	}
 
-	public async OnAbilityCreated(abil: AbilityX) {
+	public  OnAbilityCreated(abil: AbilityX) {
 		if (this.items.some(item => item.Equals(abil)))
 			return
 		this.items.push(new ItemModel(abil))
-		await this.menu.OnAddItem(abil)
+		this.menu.OnAddItem(abil)
 	}
 
-	public async OnAbilityDestroyed(abil: AbilityX) {
+	public  OnAbilityDestroyed(abil: AbilityX) {
 		const item = this.items.find(item_ => item_.Equals(abil))
 		if (item !== undefined)
 			ArrayExtensions.arrayRemove(this.items, item)
@@ -46,7 +46,7 @@ export default class UnitModel {
 	}
 
 	/** restart bear */
-	public async OnLifeStateChanged() {
+	public  OnLifeStateChanged() {
 		if (!this.Unit.IsAlive) {
 			this.OnEntityDestroyed()
 			return

@@ -159,33 +159,33 @@ export default class ItemPanelManager {
 			model.OnPostDataUpdate()
 	}
 
-	public async OnEntityCreated(entity: EntityX) {
+	public  OnEntityCreated(entity: EntityX) {
 		if (entity instanceof AbilityX)
-			await this.OnAbilityCreated(entity)
+			this.OnAbilityCreated(entity)
 	}
 
-	public async OnEntityChanged(entity: EntityX) {
+	public  OnEntityChanged(entity: EntityX) {
 		if (!(entity instanceof UnitX))
 			return
 		if (!this.IsValidOwner(entity)) {
-			await this.OnEntityDestroyed(entity)
+			this.OnEntityDestroyed(entity)
 			return
 		}
 		for (const abil of entity.Abilities.filter(x => x.IsItem))
-			await this.OnEntityCreated(abil)
+			this.OnEntityCreated(abil)
 	}
 
-	public async OnLifeStateChanged(entity: EntityX) {
+	public  OnLifeStateChanged(entity: EntityX) {
 		if (!(entity instanceof SpiritBearX))
 			return
 		const model = this.units.get(entity)
 		if (model !== undefined)
-			await model.OnLifeStateChanged()
+			model.OnLifeStateChanged()
 	}
 
-	public async OnEntityDestroyed(entity: EntityX) {
+	public  OnEntityDestroyed(entity: EntityX) {
 		if (entity instanceof AbilityX)
-			await this.OnAbilityDestroyed(entity)
+			this.OnAbilityDestroyed(entity)
 		if (!(entity instanceof UnitX))
 			return
 		const model = this.units.get(entity)
@@ -195,26 +195,26 @@ export default class ItemPanelManager {
 		}
 	}
 
-	public async OnUnitItemsChanged(unit: UnitX, abil?: AbilityX, transferred?: boolean) {
+	public OnUnitItemsChanged(unit: UnitX, abil?: AbilityX, transferred?: boolean) {
 		if (unit.IsIllusion)
 			return
 		if (transferred && abil !== undefined) {
-			await this.OnAbilityChanged(abil, unit)
+			this.OnAbilityChanged(abil, unit)
 			return
 		}
 		for (const item of unit.Abilities.filter(x => x.IsItem))
-			await this.OnAbilityCreated(item)
+			this.OnAbilityCreated(item)
 	}
 
-	public async OnUnitAbilitiesChanged(unit: UnitX, abil?: AbilityX, transferred?: boolean) {
+	public OnUnitAbilitiesChanged(unit: UnitX, abil?: AbilityX, transferred?: boolean) {
 		if (unit.IsIllusion)
 			return
 		if (transferred && abil !== undefined) {
-			await this.OnAbilityChanged(abil, unit)
+			this.OnAbilityChanged(abil, unit)
 			return
 		}
 		for (const item of unit.Abilities.filter(x => !x.IsItem))
-			await this.OnAbilityCreated(item)
+			this.OnAbilityCreated(item)
 	}
 
 	public OnMouseKeyDown(key: VMouseKeys) {
@@ -286,11 +286,11 @@ export default class ItemPanelManager {
 		return true
 	}
 
-	public async OnGameEnded() {
+	public  OnGameEnded() {
 		this.TotalItems = 0
 		this.DrwableUnits = []
 		this.dirtyPosition = false
-		await this.menu.OnGameEnded()
+		this.menu.OnGameEnded()
 	}
 
 	public OnGameStarted() {
@@ -298,22 +298,22 @@ export default class ItemPanelManager {
 		this.menu.OnGameStarted()
 	}
 
-	protected async OnAbilityChanged(abil: AbilityX, unit: UnitX) {
+	protected OnAbilityChanged(abil: AbilityX, unit: UnitX) {
 		if (!abil.IsItem || abil.IsFake || !abil.CanDrawable)
 			return
 		const owner = abil.Owner
 		if (owner === undefined)
 			return
 		if (!this.IsValidOwner(owner)) {
-			await this.OnEntityDestroyed(owner)
+			this.OnEntityDestroyed(owner)
 			return
 		}
 		const model = this.units.get(unit)
 		if (model !== undefined)
-			await model.OnAbilityDestroyed(abil)
+			model.OnAbilityDestroyed(abil)
 	}
 
-	protected async OnAbilityCreated(abil: AbilityX) {
+	protected OnAbilityCreated(abil: AbilityX) {
 		if (!abil.IsItem || abil.IsFake || !abil.CanDrawable)
 			return
 
@@ -322,7 +322,7 @@ export default class ItemPanelManager {
 			return
 
 		if (!this.IsValidOwner(owner)) {
-			await this.OnEntityDestroyed(owner)
+			this.OnEntityDestroyed(owner)
 			return
 		}
 
@@ -332,10 +332,10 @@ export default class ItemPanelManager {
 			this.units.set(owner, model)
 		}
 
-		await model.OnAbilityCreated(abil)
+		model.OnAbilityCreated(abil)
 	}
 
-	protected async OnAbilityDestroyed(abil: AbilityX) {
+	protected  OnAbilityDestroyed(abil: AbilityX) {
 		if (!abil.IsItem || abil.IsFake || !abil.CanDrawable)
 			return
 		const owner = abil.Owner
@@ -343,7 +343,7 @@ export default class ItemPanelManager {
 			return
 		const model = this.units.get(owner)
 		if (model !== undefined)
-			await model.OnAbilityDestroyed(abil)
+			model.OnAbilityDestroyed(abil)
 	}
 
 	protected IsValidOwner(owner: Nullable<UnitX>) {

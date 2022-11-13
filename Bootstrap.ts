@@ -10,7 +10,7 @@ const IManager = new ItemPanelManager(IMenu)
 EventsSDK.on("Draw", () =>
 	IManager.OnDraw())
 
-EventsX.on("GameEnded", async () =>
+EventsX.on("GameEnded",  () =>
 	IManager.OnGameEnded())
 
 EventsX.on("GameStarted", () =>
@@ -25,20 +25,20 @@ InputEventSDK.on("MouseKeyUp", key =>
 InputEventSDK.on("MouseKeyDown", key =>
 	IManager.OnMouseKeyDown(key))
 
-EventsX.on("EntityCreated", async entity =>
+EventsX.on("EntityCreated",  entity =>
 	IManager.OnEntityCreated(entity))
 
-EventsX.on("EntityChanged", async entity =>
+EventsX.on("EntityChanged",  entity =>
 	IManager.OnEntityChanged(entity))
 
-EventsX.on("LifeStateChanged", async entity =>
+EventsX.on("LifeStateChanged",  entity =>
 	IManager.OnLifeStateChanged(entity))
 
-EventsX.on("EntityDestroyed", async entity =>
+EventsX.on("EntityDestroyed",  entity =>
 	IManager.OnEntityDestroyed(entity))
 
-EventsX.on("UnitAbilitiesChanged", async (unit, abil, transferred) =>
+EventsX.on("UnitAbilitiesChanged",  (unit, abil, transferred) =>
 	IManager.OnUnitAbilitiesChanged(unit, abil, transferred))
 
-EventsX.on("UnitItemsChanged", async (unit, abil, transferred) =>
+EventsX.on("UnitItemsChanged",  (unit, abil, transferred) =>
 	IManager.OnUnitItemsChanged(unit, abil, transferred))
