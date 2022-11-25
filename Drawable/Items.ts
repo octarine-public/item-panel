@@ -1,5 +1,6 @@
 import { Color } from "github.com/octarine-public/wrapper/index"
-import ItemModel from "../Models/Items"
+
+import { ItemModel } from "../Models/Items"
 
 export interface IDrwableUnit {
 	images: string
@@ -11,9 +12,8 @@ export interface IDrwableUnit {
 	isCourier: boolean
 }
 
-export default class DrwableUnit {
-
-	constructor(protected readonly option: IDrwableUnit) { }
+export class DrwableUnit {
+	constructor(protected readonly option: IDrwableUnit) {}
 
 	public get Items() {
 		return this.option.items

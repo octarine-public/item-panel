@@ -1,8 +1,14 @@
-import { AbilitySlot, AbilityX, EntityX, TownPortalScroll, TravelBoots, TravelBoots2 } from "github.com/octarine-private/immortal-core/index"
+import {
+	AbilitySlot,
+	AbilityX,
+	EntityX,
+	TownPortalScroll,
+	TravelBoots,
+	TravelBoots2
+} from "github.com/octarine-private/immortal-core/index"
 import { DOTA_ABILITY_BEHAVIOR } from "github.com/octarine-public/wrapper/index"
 
-export default class ItemModel {
-
+export class ItemModel {
 	public IsEnabled = true
 	public IsTravelBoots = false
 	public IsTownPortalScroll = false
@@ -20,8 +26,7 @@ export default class ItemModel {
 
 	public get RemainingCooldown() {
 		if (this.IsTravelBoots)
-			return this.Owner?.GetAbilityByClass(TownPortalScroll)
-				?.RemainingCooldown ?? 0
+			return this.Owner?.GetAbilityByClass(TownPortalScroll)?.RemainingCooldown ?? 0
 		return this.Item.RemainingCooldown
 	}
 
@@ -38,14 +43,12 @@ export default class ItemModel {
 	}
 
 	public get IsTpScroll() {
-		if (!this.IsTownPortalScroll)
-			return false
+		if (!this.IsTownPortalScroll) return false
 		return this.Item.IsUsable
 	}
 
 	public get HasTravelBoots() {
-		if (!this.IsTravelBoots)
-			return false
+		if (!this.IsTravelBoots) return false
 		return this.Item.IsUsable
 	}
 
@@ -54,9 +57,12 @@ export default class ItemModel {
 	}
 
 	public get IsBackPack() {
-		return this.Item.AbilitySlot >= AbilitySlot.SLOT_7 && this.Item.AbilitySlot <= AbilitySlot.SLOT_9
-			&& this.Item.AbilitySlot !== AbilitySlot.SLOT_16
-			&& this.Item.AbilitySlot !== AbilitySlot.SLOT_17
+		return (
+			this.Item.AbilitySlot >= AbilitySlot.SLOT_7 &&
+			this.Item.AbilitySlot <= AbilitySlot.SLOT_9 &&
+			this.Item.AbilitySlot !== AbilitySlot.SLOT_16 &&
+			this.Item.AbilitySlot !== AbilitySlot.SLOT_17
+		)
 	}
 
 	public get TexturePath() {
@@ -82,9 +88,15 @@ export default class ItemModel {
 	}
 
 	public ShouldDisplayItem(costValue: number, PassiveState: boolean) {
-		return this.ShouldDisplay
-			&& (costValue <= (this.Item.Cost || this.Item.IsNeutralDrop))
-			&& (!PassiveState || !(this.Item.HasBehavior(DOTA_ABILITY_BEHAVIOR.DOTA_ABILITY_BEHAVIOR_PASSIVE) && this.Item.MaxCooldown === 0))
+		return (
+			this.ShouldDisplay &&
+			costValue <= (this.Item.Cost || this.Item.IsNeutralDrop) &&
+			(!PassiveState ||
+				!(
+					this.Item.HasBehavior(DOTA_ABILITY_BEHAVIOR.DOTA_ABILITY_BEHAVIOR_PASSIVE) &&
+					this.Item.MaxCooldown === 0
+				))
+		)
 	}
 
 	public Equals(ent?: EntityX) {

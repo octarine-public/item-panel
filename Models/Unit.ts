@@ -1,20 +1,23 @@
-import { AbilityX, CourierX, HeroX, PathX, PlayerX, UnitX } from "github.com/octarine-private/immortal-core/index"
+import {
+	AbilityX,
+	CourierX,
+	HeroX,
+	PathX,
+	PlayerX,
+	UnitX
+} from "github.com/octarine-private/immortal-core/index"
 import { ArrayExtensions } from "github.com/octarine-public/wrapper/index"
-import DrawInteraction from "../Drawable/Index"
-import DrwableItems, { IDrwableUnit } from "../Drawable/Items"
-import MenuManager from "../Manager/Menu"
-import ItemModel from "./Items"
 
-export default class UnitModel {
+import { DrawInteraction } from "../Drawable/Index"
+import { DrwableUnit, IDrwableUnit } from "../Drawable/Items"
+import { MenuManager } from "../Manager/Menu"
+import { ItemModel } from "./Items"
 
+export class UnitModel {
 	public items: ItemModel[] = []
 	protected DrawInteraction: DrawInteraction
 
-	constructor(
-		public Unit: UnitX,
-		protected menu: MenuManager,
-		public IsAlly = !Unit.IsEnemy(),
-	) {
+	constructor(public Unit: UnitX, protected menu: MenuManager, public IsAlly = !Unit.IsEnemy()) {
 		this.DrawInteraction = new DrawInteraction(Unit)
 		this.CreateDraw()
 	}
@@ -24,21 +27,18 @@ export default class UnitModel {
 	}
 
 	public OnPostDataUpdate() {
-		this.DrawInteraction.OnUpdateCallback<DrwableItems>(class_ =>
-			class_.UpdateItems(this.Items))
+		this.DrawInteraction.OnUpdateCallback<DrwableUnit>(class_ => class_.UpdateItems(this.Items))
 	}
 
-	public  OnAbilityCreated(abil: AbilityX) {
-		if (this.items.some(item => item.Equals(abil)))
-			return
+	public OnAbilityCreated(abil: AbilityX) {
+		if (this.items.some(item => item.Equals(abil))) return
 		this.items.push(new ItemModel(abil))
 		this.menu.OnAddItem(abil)
 	}
 
-	public  OnAbilityDestroyed(abil: AbilityX) {
+	public OnAbilityDestroyed(abil: AbilityX) {
 		const item = this.items.find(item_ => item_.Equals(abil))
-		if (item !== undefined)
-			ArrayExtensions.arrayRemove(this.items, item)
+		if (item !== undefined) ArrayExtensions.arrayRemove(this.items, item)
 	}
 
 	public OnEntityDestroyed() {
@@ -46,7 +46,7 @@ export default class UnitModel {
 	}
 
 	/** restart bear */
-	public  OnLifeStateChanged() {
+	public OnLifeStateChanged() {
 		if (!this.Unit.IsAlive) {
 			this.OnEntityDestroyed()
 			return
@@ -55,7 +55,6 @@ export default class UnitModel {
 	}
 
 	protected OrderBy(models: ItemModel[], allyState: boolean) {
-
 		const costValue = this.menu.CostValue.value
 		const passiveState = this.menu.PassiveState.value
 		const backPackState = this.menu.BackPackState.value
@@ -63,7 +62,10 @@ export default class UnitModel {
 
 		const arr: ItemModel[] = []
 		for (const abil of orderBy) {
-			if (!abil.ShouldDisplayItem(costValue, passiveState) || this.menu.HiddenItems.IsEnabled(abil.Name))
+			if (
+				!abil.ShouldDisplayItem(costValue, passiveState) ||
+				this.menu.HiddenItems.IsEnabled(abil.Name)
+			)
 				continue
 			if ((!backPackState && abil.IsBackPack) || !(allyState || abil.Owner?.IsEnemy()))
 				continue
@@ -73,25 +75,24 @@ export default class UnitModel {
 	}
 
 	protected CreateDraw() {
-
-		if (this.DrawInteraction.Has())
-			return
+		if (this.DrawInteraction.Has()) return
 
 		let ownerName = this.Unit.Name
 
 		if (!(this.Unit instanceof HeroX))
-			ownerName = (this.Unit.Owner instanceof PlayerX)
-				? this.Unit.Owner.HeroX?.Name ?? "unknown_owner"
-				: this.Unit.Owner?.Name ?? "unknown_owner"
+			ownerName =
+				this.Unit.Owner instanceof PlayerX
+					? this.Unit.Owner.HeroX?.Name ?? "unknown_owner"
+					: this.Unit.Owner?.Name ?? "unknown_owner"
 
-		this.DrawInteraction.Set<IDrwableUnit>(DrwableItems, {
+		this.DrawInteraction.Set<IDrwableUnit>(DrwableUnit, {
 			items: this.Items,
 			isHero: this.Unit.IsHero ?? false,
 			images: PathX.Unit({ name: this.Unit.Name, team: this.Unit.Team }),
 			ownerImages: PathX.Unit({ name: ownerName, team: this.Unit.Team, iconSmall: true }),
 			isCourier: this.Unit instanceof CourierX,
 			playerColor: this.Unit.PlayerColor,
-			isEnemy: this.Unit.IsEnemy(),
+			isEnemy: this.Unit.IsEnemy()
 		})
 	}
 }

@@ -1,4 +1,4 @@
 export const enum KeyMode {
 	Pressed,
-	Toggled,
+	Toggled
 }
