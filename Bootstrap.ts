@@ -29,10 +29,8 @@ EventsX.on("LifeStateChanged", entity => IManager.OnLifeStateChanged(entity))
 
 EventsX.on("EntityDestroyed", entity => IManager.OnEntityDestroyed(entity))
 
+EventsX.on("UnitItemsChanged", (unit, abil, transferred) => IManager.OnUnitItemsChanged(unit, abil, transferred))
+
 EventsX.on("UnitAbilitiesChanged", (unit, abil, transferred) =>
 	IManager.OnUnitAbilitiesChanged(unit, abil, transferred)
-)
-
-EventsX.on("UnitItemsChanged", (unit, abil, transferred) =>
-	IManager.OnUnitItemsChanged(unit, abil, transferred)
 )

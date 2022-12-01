@@ -28,14 +28,18 @@ export class DrawInteraction {
 	public Delete<T extends DrwableUnit>(unit?: UnitX) {
 		const key = unit === undefined ? this.KeyName : this.KeyNameUnit(unit)
 		const getDraw = MapDrawable.get(key)
-		if (getDraw === undefined) return undefined
+		if (getDraw === undefined) {
+			return undefined
+		}
 		MapDrawable.delete(key)
 		return getDraw as T
 	}
 
 	public OnUpdateCallback<T extends DrwableUnit>(callback: (classType: T) => void) {
 		const getDraw = MapDrawable.get(this.KeyName)
-		if (getDraw !== undefined) callback(getDraw as T)
+		if (getDraw !== undefined) {
+			callback(getDraw as T)
+		}
 	}
 
 	protected KeyNameUnit(unit: UnitX) {

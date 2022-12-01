@@ -25,8 +25,9 @@ export class ItemModel {
 	}
 
 	public get RemainingCooldown() {
-		if (this.IsTravelBoots)
+		if (this.IsTravelBoots) {
 			return this.Owner?.GetAbilityByClass(TownPortalScroll)?.RemainingCooldown ?? 0
+		}
 		return this.Item.RemainingCooldown
 	}
 
@@ -43,12 +44,16 @@ export class ItemModel {
 	}
 
 	public get IsTpScroll() {
-		if (!this.IsTownPortalScroll) return false
+		if (!this.IsTownPortalScroll) {
+			return false
+		}
 		return this.Item.IsUsable
 	}
 
 	public get HasTravelBoots() {
-		if (!this.IsTravelBoots) return false
+		if (!this.IsTravelBoots) {
+			return false
+		}
 		return this.Item.IsUsable
 	}
 
@@ -82,8 +87,9 @@ export class ItemModel {
 	}
 
 	protected get ShouldDisplay() {
-		if (!this.IsEnabled || !this.Item.IsValid || this.AbilitySlot <= AbilitySlot.NONE)
+		if (!this.IsEnabled || !this.Item.IsValid || this.AbilitySlot <= AbilitySlot.NONE) {
 			return false
+		}
 		return this.Item.IsAvailable || this.IsBackPack
 	}
 

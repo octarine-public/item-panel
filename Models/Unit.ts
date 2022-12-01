@@ -1,11 +1,4 @@
-import {
-	AbilityX,
-	CourierX,
-	HeroX,
-	PathX,
-	PlayerX,
-	UnitX
-} from "github.com/octarine-private/immortal-core/index"
+import { AbilityX, CourierX, HeroX, PathX, PlayerX, UnitX } from "github.com/octarine-private/immortal-core/index"
 import { ArrayExtensions } from "github.com/octarine-public/wrapper/index"
 
 import { DrawInteraction } from "../Drawable/Index"
@@ -31,14 +24,18 @@ export class UnitModel {
 	}
 
 	public OnAbilityCreated(abil: AbilityX) {
-		if (this.items.some(item => item.Equals(abil))) return
+		if (this.items.some(item => item.Equals(abil))) {
+			return
+		}
 		this.items.push(new ItemModel(abil))
 		this.menu.OnAddItem(abil)
 	}
 
 	public OnAbilityDestroyed(abil: AbilityX) {
 		const item = this.items.find(item_ => item_.Equals(abil))
-		if (item !== undefined) ArrayExtensions.arrayRemove(this.items, item)
+		if (item !== undefined) {
+			ArrayExtensions.arrayRemove(this.items, item)
+		}
 	}
 
 	public OnEntityDestroyed() {
@@ -62,28 +59,30 @@ export class UnitModel {
 
 		const arr: ItemModel[] = []
 		for (const abil of orderBy) {
-			if (
-				!abil.ShouldDisplayItem(costValue, passiveState) ||
-				this.menu.HiddenItems.IsEnabled(abil.Name)
-			)
+			if (!abil.ShouldDisplayItem(costValue, passiveState) || this.menu.HiddenItems.IsEnabled(abil.Name)) {
 				continue
-			if ((!backPackState && abil.IsBackPack) || !(allyState || abil.Owner?.IsEnemy()))
+			}
+			if ((!backPackState && abil.IsBackPack) || !(allyState || abil.Owner?.IsEnemy())) {
 				continue
+			}
 			arr.push(abil)
 		}
 		return arr
 	}
 
 	protected CreateDraw() {
-		if (this.DrawInteraction.Has()) return
+		if (this.DrawInteraction.Has()) {
+			return
+		}
 
 		let ownerName = this.Unit.Name
 
-		if (!(this.Unit instanceof HeroX))
+		if (!(this.Unit instanceof HeroX)) {
 			ownerName =
 				this.Unit.Owner instanceof PlayerX
 					? this.Unit.Owner.HeroX?.Name ?? "unknown_owner"
 					: this.Unit.Owner?.Name ?? "unknown_owner"
+		}
 
 		this.DrawInteraction.Set<IDrwableUnit>(DrwableUnit, {
 			items: this.Items,

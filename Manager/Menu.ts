@@ -32,10 +32,7 @@ export class MenuManager {
 	protected HiddenItemsInfo: Menu.ImageSelector
 
 	constructor() {
-		this.Tree = Menu.AddEntryDeep(
-			["Visual", "Item Panel"],
-			["panorama/images/control_icons/hamburger_png.vtex_c"]
-		)
+		this.Tree = Menu.AddEntryDeep(["Visual", "Item Panel"], ["panorama/images/control_icons/hamburger_png.vtex_c"])
 
 		this.Tree.SortNodes = false
 		this.IState = this.Tree.AddToggle("State", true)
@@ -47,11 +44,7 @@ export class MenuManager {
 		this.CooldwnState = this.Tree.AddToggle("ItemPanel_Cooldwn_State", true)
 		this.ChargeState = this.Tree.AddToggle("ItemPanel_Charge_State", true)
 		this.EmptySlot = this.Tree.AddToggle("ItemPanel_EmptySlot")
-		this.FormatTime = this.Tree.AddToggle(
-			"Cooldown format time",
-			false,
-			"Show cooldown format time (min:sec)"
-		)
+		this.FormatTime = this.Tree.AddToggle("Cooldown format time", false, "Show cooldown format time (min:sec)")
 
 		const KeysTree = this.Tree.AddNode("ItemPanel_Keys")
 		this.HiddenItemTree = this.Tree.AddNode("Hide items")
@@ -104,36 +97,37 @@ export class MenuManager {
 	}
 
 	public get GetItemPanelPos() {
-		return new Vector2(
-			GUIInfo.ScaleWidth(this.Position.X.value),
-			GUIInfo.ScaleHeight(this.Position.Y.value)
-		)
+		return new Vector2(GUIInfo.ScaleWidth(this.Position.X.value), GUIInfo.ScaleHeight(this.Position.Y.value))
 	}
 
 	public get HeroSize() {
-		return new Vector2(
-			GUIInfo.ScaleWidth(this.Size.value * 1.6),
-			GUIInfo.ScaleHeight(this.Size.value)
-		)
+		return new Vector2(GUIInfo.ScaleWidth(this.Size.value * 1.6), GUIInfo.ScaleHeight(this.Size.value))
 	}
 
 	public get ItemSize() {
-		return new Vector2(
-			GUIInfo.ScaleWidth(this.Size.value),
-			GUIInfo.ScaleHeight(this.Size.value)
-		)
+		return new Vector2(GUIInfo.ScaleWidth(this.Size.value), GUIInfo.ScaleHeight(this.Size.value))
 	}
 
 	public OnAddItem(abil: AbilityX) {
-		if (this.CachedItemNames.includes(abil.Name)) return
+		if (this.CachedItemNames.includes(abil.Name)) {
+			return
+		}
 
-		if (this.HiddenItems.IsHidden) this.HiddenItems.IsHidden = false
+		if (this.HiddenItems.IsHidden) {
+			this.HiddenItems.IsHidden = false
+		}
 
-		if (this.PassiveState.IsHidden) this.PassiveState.IsHidden = false
+		if (this.PassiveState.IsHidden) {
+			this.PassiveState.IsHidden = false
+		}
 
-		if (this.CostValue.IsHidden) this.CostValue.IsHidden = false
+		if (this.CostValue.IsHidden) {
+			this.CostValue.IsHidden = false
+		}
 
-		if (!this.HiddenItemsInfo.IsHidden) this.HiddenItemsInfo.IsHidden = true
+		if (!this.HiddenItemsInfo.IsHidden) {
+			this.HiddenItemsInfo.IsHidden = true
+		}
 
 		this.HiddenItems.values.push(abil.Name)
 		this.HiddenItems.Update()
@@ -141,23 +135,39 @@ export class MenuManager {
 	}
 
 	public OnGameStarted() {
-		if (this.PassiveState.IsHidden) this.PassiveState.IsHidden = false
+		if (this.PassiveState.IsHidden) {
+			this.PassiveState.IsHidden = false
+		}
 
-		if (this.CostValue.IsHidden) this.CostValue.IsHidden = false
+		if (this.CostValue.IsHidden) {
+			this.CostValue.IsHidden = false
+		}
 
-		if (this.HiddenItems.IsHidden) this.HiddenItems.IsHidden = false
+		if (this.HiddenItems.IsHidden) {
+			this.HiddenItems.IsHidden = false
+		}
 
-		if (!this.HiddenItemsInfo.IsHidden) this.HiddenItemsInfo.IsHidden = true
+		if (!this.HiddenItemsInfo.IsHidden) {
+			this.HiddenItemsInfo.IsHidden = true
+		}
 	}
 
 	public OnGameEnded() {
-		if (!this.HiddenItems.IsHidden) this.HiddenItems.IsHidden = true
+		if (!this.HiddenItems.IsHidden) {
+			this.HiddenItems.IsHidden = true
+		}
 
-		if (!this.PassiveState.IsHidden) this.PassiveState.IsHidden = true
+		if (!this.PassiveState.IsHidden) {
+			this.PassiveState.IsHidden = true
+		}
 
-		if (!this.CostValue.IsHidden) this.CostValue.IsHidden = true
+		if (!this.CostValue.IsHidden) {
+			this.CostValue.IsHidden = true
+		}
 
-		if (this.HiddenItemsInfo.IsHidden) this.HiddenItemsInfo.IsHidden = false
+		if (this.HiddenItemsInfo.IsHidden) {
+			this.HiddenItemsInfo.IsHidden = false
+		}
 
 		for (const name of this.CachedItemNames) {
 			ArrayExtensions.arrayRemove(this.HiddenItems.values, name)
