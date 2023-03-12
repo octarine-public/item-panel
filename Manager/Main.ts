@@ -9,7 +9,7 @@ import {
 	RectangleX,
 	SpiritBearX,
 	UnitX,
-	Util
+	IMath
 } from "github.com/octarine-private/immortal-core/index"
 import {
 	ArrayExtensions,
@@ -165,7 +165,7 @@ export class ItemPanelManager {
 				if (item.RemainingCooldown > 0 && this.menu.CooldwnState.value) {
 					const text =
 						this.menu.FormatTime.value && item.RemainingCooldown >= 60
-							? Util.FormatTime(item.RemainingCooldown)
+							? IMath.FormatTime(item.RemainingCooldown)
 							: item.RemainingCooldown < 10
 							? item.RemainingCooldown.toFixed(1)
 							: Math.ceil(item.RemainingCooldown).toFixed()
