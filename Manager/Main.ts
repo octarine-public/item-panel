@@ -5,11 +5,11 @@ import {
 	EntityX,
 	FlagText,
 	HeroX,
+	IMath,
 	PathX,
 	RectangleX,
 	SpiritBearX,
-	UnitX,
-	IMath
+	UnitX
 } from "github.com/octarine-private/immortal-core/index"
 import {
 	ArrayExtensions,
