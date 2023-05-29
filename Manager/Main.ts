@@ -44,12 +44,19 @@ export class ItemPanelManager {
 
 	constructor(protected menu: MenuManager) {}
 
+	public get IsPostGame() {
+		return (
+			(GameRules?.GameState ?? DOTAGameState.DOTA_GAMERULES_STATE_POST_GAME) ===
+			DOTAGameState.DOTA_GAMERULES_STATE_POST_GAME
+		)
+	}
+
 	private get IsValidShop() {
 		return GUIInfo.OpenShopLarge !== undefined && GUIInfo.OpenShopMini !== undefined
 	}
 
 	public OnDraw() {
-		if (!this.menu.State || GameState.UIState !== DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME) {
+		if (!this.menu.State || this.IsPostGame || GameState.UIState !== DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME) {
 			return
 		}
 
@@ -203,7 +210,7 @@ export class ItemPanelManager {
 			MapDrawable.clear()
 		}
 
-		if (!this.menu.State) {
+		if (!this.menu.State || this.IsPostGame) {
 			return
 		}
 
@@ -260,7 +267,7 @@ export class ItemPanelManager {
 	}
 
 	public OnUnitItemsChanged(unit: UnitX, abil?: AbilityX, transferred?: boolean) {
-		if (unit.IsIllusion) {
+		if (!unit.IsValid || unit.IsIllusion) {
 			return
 		}
 		if (transferred && abil !== undefined) {
@@ -273,7 +280,7 @@ export class ItemPanelManager {
 	}
 
 	public OnUnitAbilitiesChanged(unit: UnitX, abil?: AbilityX, transferred?: boolean) {
-		if (unit.IsIllusion) {
+		if (!unit.IsValid || unit.IsIllusion) {
 			return
 		}
 		if (transferred && abil !== undefined) {
@@ -454,7 +461,7 @@ export class ItemPanelManager {
 	}
 
 	private IsValidInput(key: VMouseKeys) {
-		return key === VMouseKeys.MK_LBUTTON && GameState.UIState === DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME
+		return key === VMouseKeys.MK_LBUTTON && GameState.UIState === DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME && !this.IsPostGame
 	}
 
 	private Reduce(arr: DrwableUnit[]) {
