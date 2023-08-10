@@ -178,12 +178,13 @@ export class ItemPanelManager {
 							: Math.ceil(item.RemainingCooldown).toFixed()
 
 					RectangleX.Image(PathX.Images.softedge_horizontal, itemsPosition2, Color.Black.SetA(165))
-					RectangleX.Text(text, itemsPosition2, Color.White, 1.65)
+					RectangleX.Text(text, itemsPosition2, Color.White, 1.65, FlagText.CENTER, { fixDigits: true })
 				}
 
 				if (item.RemainingCooldown <= 0 && item.Charges !== 0 && this.menu.ChargeState.value) {
 					RectangleX.Text(item.Charges.toFixed(), itemsPosition2, Color.White, 2, FlagText.BOT_RIGHT, {
-						filedRect: true
+						filedRect: true,
+						fixDigits: true
 					})
 				}
 
@@ -461,7 +462,11 @@ export class ItemPanelManager {
 	}
 
 	private IsValidInput(key: VMouseKeys) {
-		return key === VMouseKeys.MK_LBUTTON && GameState.UIState === DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME && !this.IsPostGame
+		return (
+			key === VMouseKeys.MK_LBUTTON &&
+			GameState.UIState === DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME &&
+			!this.IsPostGame
+		)
 	}
 
 	private Reduce(arr: DrwableUnit[]) {
