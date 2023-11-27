@@ -1,5 +1,5 @@
 {
-	"Ally": "Союзники",
+	"Allies": "Союзники",
 	"Item Panel": "Панель предметов",
 	"Backpack": "Рюкзак",
 	"ItemPanel_KeyMode": "Режим бинда",
@@ -14,7 +14,8 @@
 	"ItemPanel_PingClick2": "Оповещения",
 	"ItemPanel_Drag": "< Перенести >",
 	"Hide items": "Скрыть предметы",
-	"Couriers": "Курьеры",
+	"Common items": "Общие предметы",
+	"Rare items": "Редкие предметы",
 	"Cooldown format time": "Перезарядка формат. времени",
 	"Show cooldown format time (min:sec)": "Показывать время в формате (минуты:секунды)"
 }
