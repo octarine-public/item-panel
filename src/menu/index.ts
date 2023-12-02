@@ -116,7 +116,7 @@ export class MenuManager {
 		this.Ally.value = false
 		this.Charge.value = true
 		this.Cooldown.value = true
-		this.BackPack.value = true
+		this.BackPack.value = false
 		this.FormatTime.value = false
 		this.Size.value = 0
 		this.Position.X.value = 0
