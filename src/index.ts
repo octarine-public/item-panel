@@ -13,8 +13,11 @@ import {
 	InputEventSDK,
 	Item,
 	Menu,
+	NotificationsSDK,
 	Rectangle,
 	RendererSDK,
+	ResetSettingsUpdated,
+	Sleeper,
 	SpiritBear,
 	Unit,
 	Vector2,
@@ -30,6 +33,7 @@ const bootstrap = new (class CItemPanel {
 	private draggingOffset = new Vector2()
 
 	private readonly menu = new MenuManager()
+	private readonly sleeper = new Sleeper()
 	private readonly units = new Map<Unit, UnitData>()
 	private readonly totalPosition = new Rectangle()
 
@@ -41,32 +45,62 @@ const bootstrap = new (class CItemPanel {
 		this.menuChanged()
 	}
 
-	protected get State() {
+	private get state() {
 		return this.menu.State.value
 	}
 
-	protected get IsPostGame() {
+	private get isScoreboardPosition() {
+		if (!Input.IsScoreboardOpen) {
+			return false
+		}
+		return this.shouldPosition(GUIInfo.Scoreboard.Background)
+	}
+
+	private get isShopPosition() {
+		if (!Input.IsShopOpen) {
+			return false
+		}
+		return this.shouldPosition(
+			GUIInfo.OpenShopMini.Items,
+			GUIInfo.OpenShopMini.Header,
+			GUIInfo.OpenShopMini.GuideFlyout,
+			GUIInfo.OpenShopMini.ItemCombines,
+			GUIInfo.OpenShopMini.PinnedItems,
+			GUIInfo.OpenShopLarge.Items,
+			GUIInfo.OpenShopLarge.Header,
+			GUIInfo.OpenShopLarge.GuideFlyout,
+			GUIInfo.OpenShopLarge.PinnedItems,
+			GUIInfo.OpenShopLarge.ItemCombines
+		)
+	}
+
+	private get isPostGame() {
 		return (
 			GameRules === undefined ||
 			GameRules.GameState === DOTAGameState.DOTA_GAMERULES_STATE_POST_GAME
 		)
 	}
 
-	private get shouldBindDisplayPanel() {
+	private get isToggleKeyMode() {
 		const menu = this.menu
 		const toggleKey = menu.ToggleKey
+		// if toggle key is not assigned (setting to "None")
 		if (toggleKey.assignedKey < 0) {
-			return true
+			return false
 		}
 		const keyModeID = menu.ModeKey.SelectedID
-		return !(
+		return (
 			(keyModeID === KeyMode.Toggled && !menu.IsToggled) ||
 			(keyModeID === KeyMode.Pressed && !toggleKey.isPressed)
 		)
 	}
 
 	public Draw() {
-		if (!this.State || this.IsPostGame || !this.shouldBindDisplayPanel) {
+		if (!this.state || this.isPostGame || this.isToggleKeyMode) {
+			return
+		}
+
+		if (this.isShopPosition || this.isScoreboardPosition) {
 			return
 		}
 
@@ -104,21 +138,23 @@ const bootstrap = new (class CItemPanel {
 
 		this.calculateBottomSize(maxItem, position)
 
-		if (this.dragging) {
-			this.renderMoveBackground()
-			const wSize = RendererSDK.WindowSize
-			const mousePos = Input.CursorOnScreen
-			const toPosition = mousePos
-				.SubtractForThis(this.draggingOffset)
-				.Min(wSize.Subtract(this.totalPosition.Size))
-				.Max(0)
-				.CopyTo(positionPanel)
-			this.saveNewPosition(toPosition)
+		if (!this.dragging) {
+			return
 		}
+
+		this.renderMoveBackground()
+		const wSize = RendererSDK.WindowSize
+		const mousePos = Input.CursorOnScreen
+		const toPosition = mousePos
+			.SubtractForThis(this.draggingOffset)
+			.Min(wSize.Subtract(this.totalPosition.Size))
+			.Max(0)
+			.CopyTo(positionPanel)
+		this.saveNewPosition(toPosition)
 	}
 
 	public UnitItemsChanged(unit: Unit) {
-		if (!unit.IsValid || !this.isShouldUnit(unit)) {
+		if (!unit.IsValid || !this.shouldUnit(unit)) {
 			return
 		}
 		const getUnitData = this.getUnitData(unit)
@@ -138,7 +174,7 @@ const bootstrap = new (class CItemPanel {
 	}
 
 	public EntityDestroyed(entity: Entity) {
-		if (entity instanceof Unit && this.isShouldUnit(entity)) {
+		if (entity instanceof Unit && this.shouldUnit(entity)) {
 			this.units.delete(entity)
 		}
 		if (!(entity instanceof Item)) {
@@ -197,28 +233,20 @@ const bootstrap = new (class CItemPanel {
 
 	public GameEnded() {
 		this.resetTempFeature()
+		this.sleeper.FullReset()
 	}
 
 	public GameStarted() {
 		this.resetTempFeature()
+		this.sleeper.FullReset()
 	}
 
 	public UnitAbilityDataUpdated() {
 		this.menu.HiddenItems.UnitAbilityDataUpdated()
 	}
 
-	private isShouldUnit(unit: Unit): unit is SpiritBear | Hero {
-		if (unit.IsIllusion || unit.IsClone) {
-			return false
-		}
-		if (unit instanceof SpiritBear) {
-			return unit.ShouldRespawn
-		}
-		return unit.IsHero
-	}
-
 	private getUnitData(unit: Unit) {
-		if (!this.isShouldUnit(unit)) {
+		if (!this.shouldUnit(unit)) {
 			return
 		}
 		if (!unit.IsValid) {
@@ -269,50 +297,82 @@ const bootstrap = new (class CItemPanel {
 		this.totalPosition.Height -= position.Height - this.units.size
 	}
 
-	private updateScaleImageItem(call: Menu.Slider) {
-		const size = Math.min(Math.max(call.value + 20, 20), 40)
-		const sizeX = GUIInfo.ScaleWidth(size * 1.3)
-		const sizeY = GUIInfo.ScaleHeight(size)
-		this.scaleItemSize.x = sizeX
-		this.scaleItemSize.y = sizeY
+	private shouldPosition(...positions: Rectangle[]) {
+		return positions.some(position => this.isContainsPanel(position))
 	}
 
-	private updateScaleImageUnit(call: Menu.Slider) {
-		const size = Math.min(Math.max(call.value + 20, 20), 40)
-		const sizeX = GUIInfo.ScaleWidth(size * 1.6)
-		const sizeY = GUIInfo.ScaleHeight(size)
-		this.scaleUnitImageSize.x = sizeX
-		this.scaleUnitImageSize.y = sizeY
+	private isContainsPanel(position: Rectangle) {
+		return position.Contains(this.totalPosition.pos1)
+	}
+
+	private shouldUnit(unit: Unit): unit is SpiritBear | Hero {
+		if (unit.IsIllusion || unit.IsClone) {
+			return false
+		}
+		if (unit instanceof SpiritBear) {
+			return unit.ShouldRespawn
+		}
+		return unit.IsHero
 	}
 
 	private shouldInput(key: VMouseKeys) {
-		return (
-			!this.IsPostGame &&
-			key === VMouseKeys.MK_LBUTTON &&
-			GameState.UIState === DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME
-		)
+		if (this.isPostGame || key !== VMouseKeys.MK_LBUTTON) {
+			return false
+		}
+		if (GameState.UIState !== DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME) {
+			return false
+		}
+		return true
 	}
 
-	private saveNewPosition(newPosition?: Vector2) {
-		const position = newPosition ?? this.scalePositionPanel
-		this.menu.Position.Vector = position.RoundForThis(1)
-	}
 	private resetTempFeature() {
 		this.dragging = false
 		this.draggingOffset.toZero()
 	}
 
 	private menuChanged() {
-		this.menu.Size.OnValue(call => {
-			this.updateScaleImageUnit(call)
-			this.updateScaleImageItem(call)
-		})
-		this.menu.Position.X.OnValue(
-			call => (this.scalePositionPanel.x = GUIInfo.ScaleWidth(call.value))
-		)
-		this.menu.Position.Y.OnValue(
-			call => (this.scalePositionPanel.y = GUIInfo.ScaleHeight(call.value))
-		)
+		this.menu.Reset.OnValue(() => this.resetSettings())
+		this.menu.Size.OnValue(() => this.updateScaleSize())
+		this.menu.Position.X.OnValue(() => this.updateScalePosition())
+		this.menu.Position.Y.OnValue(() => this.updateScalePosition())
+	}
+
+	private updateScaleSize() {
+		const minSize = 20
+		const sizeMenu = this.menu.Size.value
+		const size = Math.min(Math.max(sizeMenu + minSize, minSize), minSize * 2)
+
+		const sizeY = GUIInfo.ScaleHeight(size)
+		this.scaleItemSize.y = this.scaleUnitImageSize.y = sizeY
+
+		this.scaleItemSize.x = GUIInfo.ScaleWidth(size * 1.3)
+		this.scaleUnitImageSize.x = GUIInfo.ScaleWidth(size * 1.6)
+	}
+
+	private updateScalePosition() {
+		const menuPosition = this.menu.Position
+		const valueX = Math.max(GUIInfo.ScaleWidth(menuPosition.X.value), 0)
+		this.scalePositionPanel.x = valueX
+		const valueY = Math.max(GUIInfo.ScaleHeight(menuPosition.Y.value), 0)
+		this.scalePositionPanel.y = valueY
+	}
+
+	private saveNewPosition(newPosition?: Vector2) {
+		const position = newPosition ?? this.scalePositionPanel
+		this.menu.Position.Vector = position.RoundForThis(1)
+	}
+
+	private resetSettings() {
+		if (this.sleeper.Sleeping("ResetSettings")) {
+			return
+		}
+		this.menu.ResetSettings()
+		this.updateScaleSize()
+		this.updateScalePosition()
+		this.resetTempFeature()
+		this.saveNewPosition()
+		this.sleeper.Sleep(1000, "ResetSettings")
+		NotificationsSDK.Push(new ResetSettingsUpdated())
 	}
 })()
 

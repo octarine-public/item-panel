@@ -6,7 +6,7 @@
 	"Hold key": "Удерживать",
 	"Toggled": "Переключать",
 	"ItemPanel_Key": "Бинд",
-	"Key bind turn on/off panel": "Клавиша бинда на включение и выключение панели",
+	"Key bind turn on/off panel": "Клавиша бинда\nна включение и выключение панели",
 	"ItemPanel_Keys": "Бинды",
 	"ItemPanel_EmptySlot": "Показать пустые слоты",
 	"ItemPanel_Charge_State": "Количество зарядов",
@@ -17,5 +17,7 @@
 	"Common items": "Общие предметы",
 	"Rare items": "Редкие предметы",
 	"Cooldown format time": "Перезарядка формат. времени",
-	"Show cooldown format time (min:sec)": "Показывать время в формате (минуты:секунды)"
+	"Show cooldown format time (min:sec)": "Показывать время\nв формате (минуты:секунды)",
+	"Show allies": "Показывать союзников",
+	"Show backpack": "Показывать рюкзак"
 }

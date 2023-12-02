@@ -110,12 +110,12 @@ export class UnitData {
 
 	public UnitItemsChanged(newItems: Item[]) {
 		this.items = newItems
-		this.items.orderBy(x => (x instanceof item_tpscroll ? x.Slot : -x.Slot))
+		this.sortItems()
 	}
 
 	public EntityDestroyed(item: Item) {
 		this.items.remove(item)
-		this.items.orderBy(x => (x instanceof item_tpscroll ? x.Slot : -x.Slot))
+		this.sortItems()
 	}
 
 	protected RenderText(
@@ -174,7 +174,7 @@ export class UnitData {
 		)
 	}
 
-	public ShouldDisplayItem(item: Item, costValue: number, passiveState: boolean) {
+	protected ShouldDisplayItem(item: Item, costValue: number, passiveState: boolean) {
 		return (
 			(costValue <= item.Cost || item.IsNeutralDrop) &&
 			(!passiveState ||
@@ -184,5 +184,9 @@ export class UnitData {
 					) && item.MaxCooldown === 0
 				))
 		)
+	}
+
+	protected sortItems() {
+		this.items.orderBy(x => (x instanceof item_tpscroll ? x.Slot : -x.Slot))
 	}
 }

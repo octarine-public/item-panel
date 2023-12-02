@@ -16,6 +16,7 @@ export class MenuManager {
 	public readonly Cooldown: Menu.Toggle
 	public readonly FormatTime: Menu.Toggle
 
+	public readonly Reset: Menu.Button
 	public readonly ModeKey: Menu.Dropdown
 	public readonly ToggleKey: Menu.KeyBind
 	public readonly HiddenItems: HiddenItems
@@ -78,21 +79,6 @@ export class MenuManager {
 			ImageData.Paths.Icons.icon_svg_format_time
 		)
 
-		const KeysTree = this.tree.AddNode(
-			"ItemPanel_Keys",
-			ImageData.Paths.Icons.icon_svg_keyboard
-		)
-		this.ToggleKey = KeysTree.AddKeybind(
-			"ItemPanel_Key",
-			"",
-			"Key bind turn on/off panel"
-		)
-		this.ModeKey = KeysTree.AddDropdown(
-			"ItemPanel_KeyMode",
-			["Hold key", "Toggled"],
-			1
-		)
-
 		this.HiddenItems = new HiddenItems(this.tree)
 
 		const settingsTree = this.tree.AddNode(
@@ -100,6 +86,17 @@ export class MenuManager {
 			ImageData.Paths.Icons.icon_settings
 		)
 		settingsTree.SortNodes = false
+
+		this.ToggleKey = settingsTree.AddKeybind(
+			"ItemPanel_Key",
+			"",
+			"Key bind turn on/off panel"
+		)
+		this.ModeKey = settingsTree.AddDropdown(
+			"ItemPanel_KeyMode",
+			["Hold key", "Toggled"],
+			1
+		)
 
 		this.Size = settingsTree.AddSlider("Size", 0, 0, 20)
 		this.Position = this.tree.AddVector2(
@@ -109,6 +106,24 @@ export class MenuManager {
 			new Vector2(1920, 1080)
 		)
 
+		this.Reset = this.tree.AddButton("Reset", "Reset settings")
 		this.ToggleKey.OnRelease(() => (this.IsToggled = !this.IsToggled))
+	}
+
+	public ResetSettings() {
+		this.IsToggled = true
+		this.State.value = true
+		this.Ally.value = false
+		this.Charge.value = true
+		this.Cooldown.value = true
+		this.BackPack.value = true
+		this.FormatTime.value = false
+		this.Size.value = 0
+		this.Position.X.value = 0
+		this.Position.Y.value = 600
+		this.ModeKey.SelectedID = 1
+		this.ToggleKey.assignedKey = -1
+		this.ToggleKey.assignedKeyStr = "None"
+		this.HiddenItems.ResetSettings()
 	}
 }
