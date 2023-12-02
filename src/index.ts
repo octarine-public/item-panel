@@ -30,7 +30,6 @@ import { UnitData } from "./unit"
 
 const bootstrap = new (class CItemPanel {
 	private dragging = false
-	private draggingOffset = new Vector2()
 
 	private readonly menu = new MenuManager()
 	private readonly sleeper = new Sleeper()
@@ -38,6 +37,7 @@ const bootstrap = new (class CItemPanel {
 	private readonly totalPosition = new Rectangle()
 
 	private readonly scaleItemSize = new Vector2()
+	private readonly draggingOffset = new Vector2()
 	private readonly scalePositionPanel = new Vector2()
 	private readonly scaleUnitImageSize = new Vector2()
 
@@ -144,7 +144,7 @@ const bootstrap = new (class CItemPanel {
 			return
 		}
 
-		this.renderMoveBackground()
+		this.backgroundDrag()
 		const wSize = RendererSDK.WindowSize
 		const mousePos = Input.CursorOnScreen
 		const toPosition = mousePos
@@ -281,14 +281,15 @@ const bootstrap = new (class CItemPanel {
 			)
 	}
 
-	private renderMoveBackground() {
+	private backgroundDrag() {
 		const position = this.totalPosition
+		const division = position.Height / 10 - this.menu.Size.value / 3
 		RendererSDK.FilledRect(position.pos1, position.Size, Color.Black.SetA(100))
 		RendererSDK.TextByFlags(
 			Menu.Localization.Localize("ItemPanel_Drag"),
 			position,
 			Color.White,
-			10
+			division
 		)
 	}
 
@@ -318,7 +319,7 @@ const bootstrap = new (class CItemPanel {
 	}
 
 	private shouldInput(key: VMouseKeys) {
-		if (this.isPostGame || key !== VMouseKeys.MK_LBUTTON) {
+		if (!this.state || this.isPostGame || key !== VMouseKeys.MK_LBUTTON) {
 			return false
 		}
 		if (GameState.UIState !== DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME) {
@@ -360,10 +361,6 @@ const bootstrap = new (class CItemPanel {
 	}
 
 	private updateMinMaxPanelPosition(position: Vector2) {
-		// check on zero if config not resolved or position not in window
-		if (position.x <= 0 || position.y <= 0) {
-			return
-		}
 		const wSize = RendererSDK.WindowSize
 		const totalSize = this.totalPosition.Size
 		const newPosition = position
