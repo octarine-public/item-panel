@@ -139,6 +139,8 @@ const bootstrap = new (class CItemPanel {
 		this.calculateBottomSize(maxItem, position)
 
 		if (!this.dragging) {
+			// NOTE: update full panel if added new unit's or items
+			this.updateMinMaxPanelPosition(positionPanel)
 			return
 		}
 
@@ -355,6 +357,20 @@ const bootstrap = new (class CItemPanel {
 		this.scalePositionPanel.x = valueX
 		const valueY = Math.max(GUIInfo.ScaleHeight(menuPosition.Y.value), 0)
 		this.scalePositionPanel.y = valueY
+	}
+
+	private updateMinMaxPanelPosition(position: Vector2) {
+		// check on zero if config not resolved or position not in window
+		if (position.x <= 0 || position.y <= 0) {
+			return
+		}
+		const wSize = RendererSDK.WindowSize
+		const totalSize = this.totalPosition.Size
+		const newPosition = position
+			.Min(wSize.Subtract(totalSize))
+			.Max(0)
+			.CopyTo(position)
+		this.saveNewPosition(newPosition)
 	}
 
 	private saveNewPosition(newPosition?: Vector2) {

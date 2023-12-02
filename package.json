@@ -1,5 +1,5 @@
 {
-	"version": "2.0.0",
+	"version": "3.0.0",
 	"name": "item-panel",
 	"main": "src/index.ts",
 	"description": "Item panel",
@@ -31,6 +31,6 @@
 	"repository": {
 		"type": "git",
 		"directory": "/",
-		"url": "https://github.com/octarine-public/item-panel"
+		"url": "https://github.com/octarine-public/item-panel.git"
 	}
 }
