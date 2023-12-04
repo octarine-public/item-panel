@@ -2,7 +2,8 @@ import {
 	ImageData,
 	LaneSelection,
 	Menu,
-	Vector2
+	Vector2,
+	VKeys
 } from "github.com/octarine-public/wrapper/index"
 
 import { HiddenItems } from "./hidden"
@@ -15,6 +16,7 @@ export class MenuManager {
 	public readonly BackPack: Menu.Toggle
 	public readonly Cooldown: Menu.Toggle
 	public readonly FormatTime: Menu.Toggle
+	public readonly Opacity: Menu.Slider
 
 	public readonly Reset: Menu.Button
 	public readonly ModeKey: Menu.Dropdown
@@ -106,6 +108,7 @@ export class MenuManager {
 		)
 		settingsTree.SortNodes = false
 		this.Size = settingsTree.AddSlider("Size", 0, 0, 20)
+		this.Opacity = settingsTree.AddSlider("Opacity", 0, 0, 50)
 		this.Position = this.tree.AddVector2(
 			"Settings",
 			new Vector2(0, 600),
@@ -126,13 +129,14 @@ export class MenuManager {
 		this.BackPack.value = false
 		this.FormatTime.value = false
 		this.Size.value = 0
+		this.Opacity.value = 0
 		this.Position.X.value = 0
 		this.Position.Y.value = 600
 		this.ModeKey.SelectedID = 1
 		this.ToggleKey.assignedKey = -1
-		this.ToggleKey.assignedKeyStr = "None"
-		this.TouchKeyPanel.assignedKey = 17
 		this.ToggleKey.assignedKeyStr = "Ctrl"
+		this.ToggleKey.assignedKeyStr = "None"
+		this.TouchKeyPanel.assignedKey = VKeys.CONTROL
 		this.HiddenItems.ResetSettings()
 	}
 }

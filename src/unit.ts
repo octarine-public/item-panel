@@ -35,19 +35,22 @@ export class UnitData {
 		}
 
 		// unit image
-		const texturePath = unit.TexturePath() ?? ""
+
 		const imageRect = position.Clone()
-		this.FieldRect(imageRect, Color.Black, dragging)
+		const texturePath = unit.TexturePath() ?? ""
+		const opacity = Math.round((1 - menu.Opacity.value / 100) * 255)
+
+		this.FieldRect(imageRect, Color.Black.SetA(Math.max(opacity, 150)), dragging)
 		imageRect.x += gap / 2
 		imageRect.y += gap / 2
 		imageRect.Width -= gap
 		imageRect.Height -= gap
-		this.Image(texturePath, imageRect, Color.White, dragging)
+		this.Image(texturePath, imageRect, Color.White.SetA(opacity), dragging)
 
 		// unit image border left
 		const leftBorder = imageRect.Clone()
 		leftBorder.Width = GUIInfo.ScaleWidth(gap)
-		this.FieldRect(leftBorder, unit.Color, dragging)
+		this.FieldRect(leftBorder, unit.Color.Clone().SetA(opacity), dragging)
 
 		let countItem = 0
 		const items = this.items
@@ -87,7 +90,11 @@ export class UnitData {
 				cooldown !== 0 || isBackPack
 					? Color.Red.SetR(isBackPack ? 138 : 255)
 					: Color.Black
-			this.FieldRect(itemPosition, borderColor, dragging)
+			this.FieldRect(
+				itemPosition,
+				borderColor.SetA(Math.max(opacity, 150)),
+				dragging
+			)
 
 			// item image
 			const imageItemRect = itemPosition.Clone()
@@ -95,9 +102,14 @@ export class UnitData {
 			imageItemRect.y += gap / 2
 			imageItemRect.Width -= gap
 			imageItemRect.Height -= gap
-			this.Image(itemTexture, imageItemRect, Color.White, isBackPack || dragging)
+			this.Image(
+				itemTexture,
+				imageItemRect,
+				Color.White.SetA(opacity),
+				isBackPack || dragging
+			)
 
-			this.RenderText(cooldown, item.CurrentCharges, itemPosition, menu)
+			this.RenderText(cooldown, item.CurrentCharges, itemPosition, opacity, menu)
 			itemPosition.AddX(itemPosition.Width)
 
 			countItem++
@@ -122,6 +134,7 @@ export class UnitData {
 		cooldown: number,
 		charges: number,
 		position: Rectangle,
+		opacity: number,
 		menu: MenuManager
 	) {
 		if (cooldown > 0 && menu.Cooldown.value) {
@@ -130,14 +143,14 @@ export class UnitData {
 					? MathSDK.FormatTime(cooldown)
 					: cooldown.toFixed()
 			RendererSDK.FilledRect(position.pos1, position.Size, Color.Black.SetA(100))
-			RendererSDK.TextByFlags(text, position, Color.White, 2.5)
+			RendererSDK.TextByFlags(text, position, Color.White.SetA(opacity + 20), 2.5)
 		}
 
 		if (charges > 0 && menu.Charge.value) {
 			RendererSDK.TextByFlags(
 				charges.toFixed(),
 				position,
-				Color.White,
+				Color.White.SetA(opacity + 20),
 				2.7,
 				TextFlags.Bottom | TextFlags.Right
 			)
