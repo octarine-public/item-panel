@@ -1,6 +1,6 @@
 import { Menu, Utils } from "github.com/octarine-public/wrapper/index"
 
-const base = "github.com/octarine-public/item-panel/scripts_files"
+const base = "github.com/octarine-public/item-panel/scripts_files/translations"
 const Load = (name: string) => {
 	return new Map<string, string>(Object.entries(Utils.readJSON(`${base}/${name}.json`)))
 }
