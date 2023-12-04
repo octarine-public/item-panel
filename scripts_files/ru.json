@@ -19,5 +19,7 @@
 	"Cooldown format time": "Перезарядка формат. времени",
 	"Show cooldown format time (min:sec)": "Показывать время\nв формате (минуты:секунды)",
 	"Show allies": "Показывать союзников",
-	"Show backpack": "Показывать рюкзак"
+	"Show backpack": "Показывать рюкзак",
+	"The button captures the panel\nfor dragging on the screen.\nIf the button is not set, the panel can only\nbe dragged using the mouse": "Кнопка захватывает панель\nдля перетаскивания по экрану.\nЕсли кнопка не установлена,\nпанель можно перетаскивать только с помощью мыши",
+	"Key mode turn on/off panel": "Режимы работы бинда\nна включение и выключение панели"
 }

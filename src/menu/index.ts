@@ -19,6 +19,7 @@ export class MenuManager {
 	public readonly Reset: Menu.Button
 	public readonly ModeKey: Menu.Dropdown
 	public readonly ToggleKey: Menu.KeyBind
+	public readonly TouchKeyPanel: Menu.KeyBind
 	public readonly HiddenItems: HiddenItems
 
 	public readonly Size: Menu.Slider
@@ -81,23 +82,29 @@ export class MenuManager {
 
 		this.HiddenItems = new HiddenItems(this.tree)
 
+		const treeBinds = this.tree.AddNode(
+			"Binds",
+			ImageData.Paths.Icons.icon_svg_keyboard
+		)
+		treeBinds.SortNodes = false
+		this.ToggleKey = treeBinds.AddKeybind("Key", "", "Key turn on/off panel")
+		this.TouchKeyPanel = treeBinds.AddKeybind(
+			"Touch panel",
+			"Ctrl",
+			"The button captures the panel\nfor dragging on the screen.\nIf the button is not set, the panel can only\nbe dragged using the mouse"
+		)
+		this.ModeKey = treeBinds.AddDropdown(
+			"Key mode",
+			["Hold key", "Toggled"],
+			1,
+			"Key mode turn on/off panel"
+		)
+
 		const settingsTree = this.tree.AddNode(
 			"Settings",
 			ImageData.Paths.Icons.icon_settings
 		)
 		settingsTree.SortNodes = false
-
-		this.ToggleKey = settingsTree.AddKeybind(
-			"ItemPanel_Key",
-			"",
-			"Key bind turn on/off panel"
-		)
-		this.ModeKey = settingsTree.AddDropdown(
-			"ItemPanel_KeyMode",
-			["Hold key", "Toggled"],
-			1
-		)
-
 		this.Size = settingsTree.AddSlider("Size", 0, 0, 20)
 		this.Position = this.tree.AddVector2(
 			"Settings",
@@ -124,6 +131,8 @@ export class MenuManager {
 		this.ModeKey.SelectedID = 1
 		this.ToggleKey.assignedKey = -1
 		this.ToggleKey.assignedKeyStr = "None"
+		this.TouchKeyPanel.assignedKey = 17
+		this.ToggleKey.assignedKeyStr = "Ctrl"
 		this.HiddenItems.ResetSettings()
 	}
 }

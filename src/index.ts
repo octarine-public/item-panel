@@ -216,11 +216,25 @@ const bootstrap = new (class CItemPanel {
 		}
 		this.dragging = false
 		Menu.Base.SaveConfigASAP = true
+		const position = this.scalePositionPanel
+		const wSize = RendererSDK.WindowSize
+		const mousePos = Input.CursorOnScreen
+		const toPosition = mousePos
+			.SubtractForThis(this.draggingOffset)
+			.Min(wSize.Subtract(this.totalPosition.Size))
+			.Max(0)
+			.CopyTo(position)
+		this.saveNewPosition(toPosition)
 		return true
 	}
 
 	public MouseKeyDown(key: VMouseKeys) {
 		if (!this.shouldInput(key) || this.dragging) {
+			return true
+		}
+		const menu = this.menu.TouchKeyPanel
+		const isTouch = menu.isPressed || menu.assignedKey === -1
+		if (!isTouch) {
 			return true
 		}
 		const mouse = Input.CursorOnScreen
