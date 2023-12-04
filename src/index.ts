@@ -1,3 +1,5 @@
+import "./translate"
+
 import {
 	Color,
 	DOTAGameState,
