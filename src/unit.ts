@@ -35,7 +35,6 @@ export class UnitData {
 		}
 
 		// unit image
-
 		const imageRect = position.Clone()
 		const texturePath = unit.TexturePath() ?? ""
 		const opacity = Math.round((1 - menu.Opacity.value / 100) * 255)
