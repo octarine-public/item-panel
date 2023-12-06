@@ -241,11 +241,13 @@ const bootstrap = new (class CItemPanel {
 	}
 
 	public GameEnded() {
+		this.restartScale()
 		this.resetTempFeature()
 		this.sleeper.FullReset()
 	}
 
 	public GameStarted() {
+		this.restartScale()
 		this.resetTempFeature()
 		this.sleeper.FullReset()
 	}
@@ -379,7 +381,11 @@ const bootstrap = new (class CItemPanel {
 
 	private saveNewPosition(newPosition?: Vector2) {
 		const position = newPosition ?? this.scalePositionPanel
-		this.menu.Position.Vector = position.RoundForThis(1)
+		this.menu.Position.Vector = position
+			.Clone()
+			.DivideScalarX(GUIInfo.GetWidthScale())
+			.DivideScalarY(GUIInfo.GetHeightScale())
+			.RoundForThis(1)
 	}
 
 	private resetSettings() {
@@ -387,12 +393,16 @@ const bootstrap = new (class CItemPanel {
 			return
 		}
 		this.menu.ResetSettings()
-		this.updateScaleSize()
-		this.updateScalePosition()
+		this.restartScale()
 		this.resetTempFeature()
-		this.saveNewPosition()
 		this.sleeper.Sleep(1000, "ResetSettings")
 		NotificationsSDK.Push(new ResetSettingsUpdated())
+	}
+
+	private restartScale() {
+		this.updateScaleSize()
+		this.updateScalePosition()
+		this.saveNewPosition()
 	}
 })()
 
