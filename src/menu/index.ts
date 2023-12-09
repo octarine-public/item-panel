@@ -107,7 +107,7 @@ export class MenuManager {
 			ImageData.Paths.Icons.icon_settings
 		)
 		settingsTree.SortNodes = false
-		this.Size = settingsTree.AddSlider("Size", 0, 0, 20)
+		this.Size = settingsTree.AddSlider("Size", 6, 0, 20)
 		this.Opacity = settingsTree.AddSlider("Opacity", 0, 0, 50)
 		this.Position = this.tree.AddVector2(
 			"Settings",
