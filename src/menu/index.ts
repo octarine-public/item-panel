@@ -89,7 +89,7 @@ export class MenuManager {
 			ImageData.Paths.Icons.icon_svg_keyboard
 		)
 		treeBinds.SortNodes = false
-		this.ToggleKey = treeBinds.AddKeybind("Key", "", "Key turn on/off panel")
+		this.ToggleKey = treeBinds.AddKeybind("Key", "None", "Key turn on/off panel")
 		this.TouchKeyPanel = treeBinds.AddKeybind(
 			"Touch panel",
 			"Ctrl",
@@ -111,7 +111,7 @@ export class MenuManager {
 		this.Opacity = settingsTree.AddSlider("Opacity", 0, 0, 50)
 		this.Position = this.tree.AddVector2(
 			"Settings",
-			new Vector2(0, 600),
+			new Vector2(0, 547),
 			new Vector2(0, 0),
 			new Vector2(1920, 1080)
 		)
@@ -122,21 +122,21 @@ export class MenuManager {
 
 	public ResetSettings() {
 		this.IsToggled = true
-		this.State.value = true
-		this.Ally.value = false
-		this.Charge.value = true
-		this.Cooldown.value = true
-		this.BackPack.value = false
-		this.FormatTime.value = false
-		this.Size.value = 0
-		this.Opacity.value = 0
-		this.Position.X.value = 0
-		this.Position.Y.value = 600
-		this.ModeKey.SelectedID = 1
-		this.ToggleKey.assignedKey = -1
-		this.ToggleKey.assignedKeyStr = "Ctrl"
-		this.ToggleKey.assignedKeyStr = "None"
+		this.State.value = this.State.defaultValue
+		this.Ally.value = this.Ally.defaultValue
+		this.Charge.value = this.Charge.defaultValue
+		this.Cooldown.value = this.Charge.defaultValue
+		this.BackPack.value = this.Charge.defaultValue
+		this.FormatTime.value = this.Charge.defaultValue
+		this.Size.value = this.Size.defaultValue
+		this.Opacity.value = this.Opacity.defaultValue
+		this.Position.X.value = this.Position.X.defaultValue
+		this.Position.Y.value = this.Position.Y.defaultValue
+		this.ModeKey.SelectedID = this.ModeKey.defaultValue
 		this.TouchKeyPanel.assignedKey = VKeys.CONTROL
+		this.TouchKeyPanel.assignedKeyStr = this.TouchKeyPanel.defaultKey
+		this.ToggleKey.assignedKey = -1
+		this.ToggleKey.assignedKeyStr = this.ToggleKey.defaultKey
 		this.HiddenItems.ResetSettings()
 	}
 }
