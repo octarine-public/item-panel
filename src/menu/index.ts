@@ -125,9 +125,9 @@ export class MenuManager {
 		this.State.value = this.State.defaultValue
 		this.Ally.value = this.Ally.defaultValue
 		this.Charge.value = this.Charge.defaultValue
-		this.Cooldown.value = this.Charge.defaultValue
-		this.BackPack.value = this.Charge.defaultValue
-		this.FormatTime.value = this.Charge.defaultValue
+		this.Cooldown.value = this.Cooldown.defaultValue
+		this.BackPack.value = this.BackPack.defaultValue
+		this.FormatTime.value = this.FormatTime.defaultValue
 		this.Size.value = this.Size.defaultValue
 		this.Opacity.value = this.Opacity.defaultValue
 		this.Position.X.value = this.Position.X.defaultValue
