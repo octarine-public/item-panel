@@ -1,4 +1,4 @@
-import "./translate"
+import "./translations"
 
 import {
 	Color,
