@@ -38,13 +38,14 @@ export class UnitData {
 		const imageRect = position.Clone()
 		const texturePath = unit.TexturePath() ?? ""
 		const opacity = Math.round((1 - menu.Opacity.value / 100) * 255)
+		const minAlpha = Math.max(opacity, 150)
 
-		this.FieldRect(imageRect, Color.Black.SetA(Math.max(opacity, 150)), dragging)
+		this.FieldRect(imageRect, Color.Black.SetA(minAlpha), dragging)
 		imageRect.x += gap / 2
 		imageRect.y += gap / 2
 		imageRect.Width -= gap
 		imageRect.Height -= gap
-		this.Image(texturePath, imageRect, Color.White.SetA(opacity), dragging)
+		this.Image(texturePath, imageRect, Color.White.SetA(minAlpha), dragging)
 
 		// unit image border left
 		const leftBorder = imageRect.Clone()
@@ -89,11 +90,8 @@ export class UnitData {
 				cooldown !== 0 || isBackPack
 					? Color.Red.SetR(isBackPack ? 138 : 255)
 					: Color.Black
-			this.FieldRect(
-				itemPosition,
-				borderColor.SetA(Math.max(opacity, 150)),
-				dragging
-			)
+
+			this.FieldRect(itemPosition, borderColor.SetA(minAlpha), dragging)
 
 			// item image
 			const imageItemRect = itemPosition.Clone()
@@ -104,7 +102,7 @@ export class UnitData {
 			this.Image(
 				itemTexture,
 				imageItemRect,
-				Color.White.SetA(opacity),
+				Color.White.SetA(minAlpha),
 				isBackPack || dragging
 			)
 
