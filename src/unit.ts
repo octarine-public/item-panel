@@ -3,6 +3,7 @@ import {
 	DOTA_ABILITY_BEHAVIOR,
 	DOTAScriptInventorySlot,
 	GUIInfo,
+	ImageData,
 	Item,
 	item_tpscroll,
 	MathSDK,
@@ -36,7 +37,7 @@ export class UnitData {
 
 		// unit image
 		const imageRect = position.Clone()
-		const texturePath = unit.TexturePath() ?? ""
+		const texture = unit.TexturePath() ?? ImageData.GetUnitTexture(unit.Name) ?? ""
 		const opacity = Math.round((1 - menu.Opacity.value / 100) * 255)
 		const minAlpha = Math.max(opacity, 150)
 
@@ -45,7 +46,7 @@ export class UnitData {
 		imageRect.y += gap / 2
 		imageRect.Width -= gap
 		imageRect.Height -= gap
-		this.Image(texturePath, imageRect, Color.White.SetA(minAlpha), dragging)
+		this.Image(texture, imageRect, Color.White.SetA(minAlpha), dragging)
 
 		// unit image border left
 		const leftBorder = imageRect.Clone()
