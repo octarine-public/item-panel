@@ -71,8 +71,8 @@ export class UnitData {
 			}
 
 			const isBackPack =
-				item.Slot >= DOTAScriptInventorySlot.DOTA_ITEM_SLOT_7 &&
-				item.Slot <= DOTAScriptInventorySlot.DOTA_ITEM_SLOT_9
+				item.ItemSlot >= DOTAScriptInventorySlot.DOTA_ITEM_SLOT_7 &&
+				item.ItemSlot <= DOTAScriptInventorySlot.DOTA_ITEM_SLOT_9
 
 			if (!menu.BackPack.value && isBackPack) {
 				continue
@@ -198,6 +198,6 @@ export class UnitData {
 	}
 
 	protected sortItems() {
-		this.items.orderBy(x => (x instanceof item_tpscroll ? x.Slot : -x.Slot))
+		this.items.orderBy(x => (x instanceof item_tpscroll ? x.ItemSlot : -x.ItemSlot))
 	}
 }
