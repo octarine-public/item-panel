@@ -19,7 +19,7 @@ import { MenuManager } from "./menu"
 export class UnitData {
 	public items: Item[] = []
 
-	constructor(public readonly Owner: Unit) { }
+	constructor(public readonly Owner: Unit) {}
 
 	public Draw(
 		gap: number,
@@ -141,7 +141,14 @@ export class UnitData {
 					? MathSDK.FormatTime(cooldown)
 					: cooldown.toFixed()
 			RendererSDK.FilledRect(position.pos1, position.Size, Color.Black.SetA(100))
-			RendererSDK.TextByFlags(text, position, Color.White.SetA(opacity + 20), 2.5, TextFlags.Center, 500)
+			RendererSDK.TextByFlags(
+				text,
+				position,
+				Color.White.SetA(opacity + 20),
+				2.5,
+				TextFlags.Center,
+				500
+			)
 		}
 
 		if (charges > 0 && menu.Charge.value) {
