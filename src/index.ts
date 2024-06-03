@@ -201,15 +201,14 @@ const bootstrap = new (class CItemPanel {
 	}
 
 	public UnitPropertyChanged(unit: Unit) {
-		if (!(unit instanceof SpiritBear)) {
+		if (this.shouldUnit(unit)) {
 			return
 		}
-		if (unit.IsIllusion || unit.IsClone) {
-			return
+		const getUnitData = this.units.get(unit)
+		if (getUnitData !== undefined) {
+			getUnitData.items.clear()
 		}
-		if (!unit.ShouldRespawn) {
-			this.units.delete(unit)
-		}
+		this.units.delete(unit)
 	}
 
 	public MouseKeyUp(key: VMouseKeys) {
@@ -318,7 +317,7 @@ const bootstrap = new (class CItemPanel {
 	}
 
 	private shouldUnit(unit: Unit): unit is SpiritBear | Hero {
-		if (unit.IsIllusion || unit.IsClone) {
+		if (unit.IsIllusion || unit.IsClone || unit.IsStrongIllusion) {
 			return false
 		}
 		if (unit instanceof SpiritBear) {
@@ -408,6 +407,10 @@ const bootstrap = new (class CItemPanel {
 
 EventsSDK.on("Draw", () => bootstrap.Draw())
 
+EventsSDK.on("GameEnded", () => bootstrap.GameEnded())
+
+EventsSDK.on("GameStarted", () => bootstrap.GameStarted())
+
 EventsSDK.on("EntityCreated", ent => bootstrap.EntityCreated(ent))
 
 EventsSDK.on("EntityDestroyed", ent => bootstrap.EntityDestroyed(ent))
@@ -415,10 +418,6 @@ EventsSDK.on("EntityDestroyed", ent => bootstrap.EntityDestroyed(ent))
 EventsSDK.on("UnitPropertyChanged", ent => bootstrap.UnitPropertyChanged(ent))
 
 EventsSDK.on("UnitItemsChanged", ent => bootstrap.UnitItemsChanged(ent))
-
-EventsSDK.on("GameEnded", () => bootstrap.GameEnded())
-
-EventsSDK.on("GameStarted", () => bootstrap.GameStarted())
 
 EventsSDK.on("UnitAbilityDataUpdated", () => bootstrap.UnitAbilityDataUpdated())
 
