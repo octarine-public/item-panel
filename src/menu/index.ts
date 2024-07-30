@@ -116,6 +116,9 @@ export class MenuManager {
 			new Vector2(1920, 1080)
 		)
 
+		const global = (globalThis as any)
+		global.Debug = this.Position
+
 		this.Reset = this.tree.AddButton("Reset", "Reset settings")
 		this.ToggleKey.OnRelease(() => (this.IsToggled = !this.IsToggled))
 	}

@@ -362,10 +362,16 @@ const bootstrap = new (class CItemPanel {
 
 	private updateScalePosition() {
 		const menuPosition = this.menu.Position
+		console.log(
+			"updateScalePosition: ", this.menu.Position.Vector.toArray(),
+			GUIInfo.GetWidthScale(), GUIInfo.GetHeightScale(), new Error().stack
+		)
+
 		const valueX = Math.max(GUIInfo.ScaleWidth(menuPosition.X.value), 0)
 		this.scalePositionPanel.x = valueX
 		const valueY = Math.max(GUIInfo.ScaleHeight(menuPosition.Y.value), 0)
 		this.scalePositionPanel.y = valueY
+		console.log("this.scalePositionPanel: ", this.scalePositionPanel.toArray(), this.scalePositionPanel)
 	}
 
 	private updateMinMaxPanelPosition(position: Vector2) {
@@ -384,7 +390,9 @@ const bootstrap = new (class CItemPanel {
 			.Clone()
 			.DivideScalarX(GUIInfo.GetWidthScale())
 			.DivideScalarY(GUIInfo.GetHeightScale())
-			.RoundForThis(1)
+			.RoundForThis()
+
+		//console.log("saving pos: ", newPosition?.toArray(), this.scalePositionPanel.toArray(), this.menu.Position.Vector.toArray())
 	}
 
 	private resetSettings() {
