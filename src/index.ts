@@ -15,11 +15,8 @@ import {
 	InputEventSDK,
 	Item,
 	Menu,
-	NotificationsSDK,
 	Rectangle,
 	RendererSDK,
-	ResetSettingsUpdated,
-	Sleeper,
 	SpiritBear,
 	Unit,
 	Vector2,
@@ -30,21 +27,30 @@ import { KeyMode } from "./enums/KeyMode"
 import { MenuManager } from "./menu/index"
 import { UnitData } from "./unit"
 
-const bootstrap = new (class CItemPanel {
+new (class CItemPanel {
 	private dragging = false
-
-	private readonly menu = new MenuManager()
-	private readonly sleeper = new Sleeper()
+	private readonly menu!: MenuManager
 	private readonly units = new Map<Unit, UnitData>()
 	private readonly totalPosition = new Rectangle()
-
-	private readonly scaleItemSize = new Vector2()
 	private readonly draggingOffset = new Vector2()
-	private readonly scalePositionPanel = new Vector2()
-	private readonly scaleUnitImageSize = new Vector2()
 
-	constructor() {
-		this.menuChanged()
+	constructor(canBeInitialized: boolean) {
+		if (!canBeInitialized) {
+			return
+		}
+		this.menu = new MenuManager()
+
+		InputEventSDK.on("MouseKeyUp", this.MouseKeyUp.bind(this))
+		InputEventSDK.on("MouseKeyDown", this.MouseKeyDown.bind(this))
+
+		EventsSDK.on("Draw", this.Draw.bind(this))
+		EventsSDK.on("GameEnded", this.GameEnded.bind(this))
+		EventsSDK.on("GameStarted", this.GameStarted.bind(this))
+		EventsSDK.on("EntityCreated", this.EntityCreated.bind(this))
+		EventsSDK.on("EntityDestroyed", this.EntityDestroyed.bind(this))
+		EventsSDK.on("UnitPropertyChanged", this.UnitPropertyChanged.bind(this))
+		EventsSDK.on("UnitItemsChanged", this.UnitItemsChanged.bind(this))
+		EventsSDK.on("UnitAbilityDataUpdated", this.UnitAbilityDataUpdated.bind(this))
 	}
 
 	private get state() {
@@ -97,19 +103,43 @@ const bootstrap = new (class CItemPanel {
 		)
 	}
 
-	public Draw() {
-		if (!this.state || this.isPostGame || this.isToggleKeyMode) {
+	private get isInGameUI() {
+		return GameState.UIState === DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME
+	}
+
+	private get scalePositionPanel() {
+		return GUIInfo.ScaleVector(this.menu.Position.X.value, this.menu.Position.Y.value)
+	}
+
+	private get size() {
+		const min = 20
+		return Math.min(Math.max(this.menu.Size.value + min, min), min * 2)
+	}
+
+	private get scaleItemSize() {
+		return GUIInfo.ScaleVector(
+			GUIInfo.ScaleWidth(this.size * 1.3),
+			GUIInfo.ScaleHeight(this.size)
+		)
+	}
+
+	private get scaleUnitImageSize() {
+		return GUIInfo.ScaleVector(
+			GUIInfo.ScaleWidth(this.size * 1.6),
+			GUIInfo.ScaleHeight(this.size)
+		)
+	}
+
+	protected Draw() {
+		if (!this.state || !this.isInGameUI || this.isPostGame) {
 			return
 		}
-
-		if (this.isShopPosition || this.isScoreboardPosition) {
+		if (GameState.IsInputCaptured || this.isShopPosition) {
 			return
 		}
-
-		if (GameState.UIState !== DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME) {
+		if (this.isScoreboardPosition || this.isToggleKeyMode) {
 			return
 		}
-
 		const gap = 2
 		const menu = this.menu
 		const maxItem: number[] = []
@@ -157,7 +187,7 @@ const bootstrap = new (class CItemPanel {
 		this.saveNewPosition(toPosition)
 	}
 
-	public UnitItemsChanged(unit: Unit) {
+	protected UnitItemsChanged(unit: Unit) {
 		if (!unit.IsValid || !this.shouldUnit(unit)) {
 			return
 		}
@@ -167,7 +197,7 @@ const bootstrap = new (class CItemPanel {
 		}
 	}
 
-	public EntityCreated(entity: Entity) {
+	protected EntityCreated(entity: Entity) {
 		if (!(entity instanceof Unit)) {
 			return
 		}
@@ -177,7 +207,7 @@ const bootstrap = new (class CItemPanel {
 		}
 	}
 
-	public EntityDestroyed(entity: Entity) {
+	protected EntityDestroyed(entity: Entity) {
 		if (entity instanceof Unit && this.shouldUnit(entity)) {
 			this.units.delete(entity)
 		}
@@ -200,7 +230,7 @@ const bootstrap = new (class CItemPanel {
 		this.getUnitData(owner)?.EntityDestroyed(entity)
 	}
 
-	public UnitPropertyChanged(unit: Unit) {
+	protected UnitPropertyChanged(unit: Unit) {
 		if (this.shouldUnit(unit)) {
 			return
 		}
@@ -211,7 +241,7 @@ const bootstrap = new (class CItemPanel {
 		this.units.delete(unit)
 	}
 
-	public MouseKeyUp(key: VMouseKeys) {
+	protected MouseKeyUp(key: VMouseKeys) {
 		if (!this.shouldInput(key) || !this.dragging) {
 			return true
 		}
@@ -220,7 +250,7 @@ const bootstrap = new (class CItemPanel {
 		return true
 	}
 
-	public MouseKeyDown(key: VMouseKeys) {
+	protected MouseKeyDown(key: VMouseKeys) {
 		if (!this.shouldInput(key) || this.dragging) {
 			return true
 		}
@@ -239,19 +269,17 @@ const bootstrap = new (class CItemPanel {
 		return false
 	}
 
-	public GameEnded() {
+	protected GameEnded() {
 		this.restartScale()
 		this.resetTempFeature()
-		this.sleeper.FullReset()
 	}
 
-	public GameStarted() {
+	protected GameStarted() {
 		this.restartScale()
 		this.resetTempFeature()
-		this.sleeper.FullReset()
 	}
 
-	public UnitAbilityDataUpdated() {
+	protected UnitAbilityDataUpdated() {
 		this.menu.HiddenItems.UnitAbilityDataUpdated()
 	}
 
@@ -330,7 +358,7 @@ const bootstrap = new (class CItemPanel {
 		if (!this.state || this.isPostGame || key !== VMouseKeys.MK_LBUTTON) {
 			return false
 		}
-		if (GameState.UIState !== DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME) {
+		if (!this.isInGameUI) {
 			return false
 		}
 		return true
@@ -339,33 +367,6 @@ const bootstrap = new (class CItemPanel {
 	private resetTempFeature() {
 		this.dragging = false
 		this.draggingOffset.toZero()
-	}
-
-	private menuChanged() {
-		this.menu.Reset.OnValue(() => this.resetSettings())
-		this.menu.Size.OnValue(() => this.updateScaleSize())
-		this.menu.Position.X.OnValue(() => this.updateScalePosition())
-		this.menu.Position.Y.OnValue(() => this.updateScalePosition())
-	}
-
-	private updateScaleSize() {
-		const minSize = 20
-		const sizeMenu = this.menu.Size.value
-		const size = Math.min(Math.max(sizeMenu + minSize, minSize), minSize * 2)
-
-		const sizeY = GUIInfo.ScaleHeight(size)
-		this.scaleItemSize.y = this.scaleUnitImageSize.y = sizeY
-
-		this.scaleItemSize.x = GUIInfo.ScaleWidth(size * 1.3)
-		this.scaleUnitImageSize.x = GUIInfo.ScaleWidth(size * 1.6)
-	}
-
-	private updateScalePosition() {
-		const menuPosition = this.menu.Position
-		const valueX = Math.max(GUIInfo.ScaleWidth(menuPosition.X.value), 0)
-		this.scalePositionPanel.x = valueX
-		const valueY = Math.max(GUIInfo.ScaleHeight(menuPosition.Y.value), 0)
-		this.scalePositionPanel.y = valueY
 	}
 
 	private updateMinMaxPanelPosition(position: Vector2) {
@@ -387,40 +388,7 @@ const bootstrap = new (class CItemPanel {
 			.RoundForThis(1)
 	}
 
-	private resetSettings() {
-		if (this.sleeper.Sleeping("ResetSettings")) {
-			return
-		}
-		this.menu.ResetSettings()
-		this.restartScale()
-		this.resetTempFeature()
-		this.sleeper.Sleep(1000, "ResetSettings")
-		NotificationsSDK.Push(new ResetSettingsUpdated())
-	}
-
 	private restartScale() {
-		this.updateScaleSize()
-		this.updateScalePosition()
 		this.saveNewPosition()
 	}
-})()
-
-EventsSDK.on("Draw", () => bootstrap.Draw())
-
-EventsSDK.on("GameEnded", () => bootstrap.GameEnded())
-
-EventsSDK.on("GameStarted", () => bootstrap.GameStarted())
-
-EventsSDK.on("EntityCreated", ent => bootstrap.EntityCreated(ent))
-
-EventsSDK.on("EntityDestroyed", ent => bootstrap.EntityDestroyed(ent))
-
-EventsSDK.on("UnitPropertyChanged", ent => bootstrap.UnitPropertyChanged(ent))
-
-EventsSDK.on("UnitItemsChanged", ent => bootstrap.UnitItemsChanged(ent))
-
-EventsSDK.on("UnitAbilityDataUpdated", () => bootstrap.UnitAbilityDataUpdated())
-
-InputEventSDK.on("MouseKeyUp", key => bootstrap.MouseKeyUp(key))
-
-InputEventSDK.on("MouseKeyDown", key => bootstrap.MouseKeyDown(key))
+})(true)

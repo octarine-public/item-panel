@@ -2,10 +2,14 @@
 	"Allies": "Союзники",
 	"Item Panel": "Панель предметов",
 	"Backpack": "Рюкзак",
+	"Key": "Клавиша",
 	"ItemPanel_KeyMode": "Режим бинда",
 	"Hold key": "Удерживать",
 	"Toggled": "Переключать",
 	"ItemPanel_Key": "Бинд",
+	"Key mode": "Режим работы",
+	"Touch panel": "Захват панели",
+	"Key turn on/off panel": "Клавиша на включение и выключение панели",
 	"Key bind turn on/off panel": "Клавиша бинда\nна включение и выключение панели",
 	"ItemPanel_EmptySlot": "Показать пустые слоты",
 	"ItemPanel_Charge_State": "Количество зарядов",
@@ -22,6 +26,11 @@
 	"Show cooldown format time (min:sec)": "Показывать время\nв формате (минуты:секунды)",
 	"Show allies": "Показывать союзников",
 	"Show backpack": "Показывать рюкзак",
+	"Hide an item if its cost is less": "Скрыть предмет если его цена меньше",
 	"The button captures the panel\nfor dragging on the screen.\nIf the button is not set, the panel can only\nbe dragged using the mouse": "Кнопка захватывает панель\nдля перетаскивания по экрану.\nЕсли кнопка не установлена,\nпанель можно перетаскивать только с помощью мыши",
-	"Key mode turn on/off panel": "Режимы работы бинда\nна включение и выключение панели"
+	"Key mode turn on/off panel": "Режимы работы бинда\nна включение и выключение панели",
+	"Hide by item cost": "Скрыть предметы с ценой меньше",
+	"Neutral items": "Нейтральные предметы",
+	"Hide passive items that\nhave no cooldown": "Скрыть пассивные предметы\nбез перезарядки",
+	"Select items\nfor hide on panel": "Выберите предметы\nдля скрытия на панели"
 }

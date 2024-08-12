@@ -103,51 +103,6 @@ export class HiddenItems {
 		)
 	}
 
-	public ResetSettings() {
-		this.Cost.value = 0
-		this.Passive.value = false
-
-		const common = this.getItemData(
-			x =>
-				x.Purchasable &&
-				!x.ItemIsNeutralDrop &&
-				(x.ItemQuality === "common" ||
-					x.ItemQuality === "consumable" ||
-					x.ItemQuality === "secret_shop" ||
-					x.ItemQuality === "component" ||
-					x.ItemQuality === undefined)
-		)
-		for (let i = 0, end = common.length; i < end; i++) {
-			const element = common[i]
-			this.CommonItems.enabledValues.set(element, false)
-		}
-		this.CommonItems.values = common
-		this.CommonItems.Update()
-
-		const rare = this.getItemData(
-			x =>
-				x.Purchasable &&
-				!x.ItemIsNeutralDrop &&
-				(x.ItemQuality === "rare" ||
-					x.ItemQuality === "epic" ||
-					x.ItemQuality === "artifact")
-		)
-		for (let i = 0, end = rare.length; i < end; i++) {
-			const element = rare[i]
-			this.RareItems.enabledValues.set(element, false)
-		}
-		this.RareItems.values = rare
-		this.RareItems.Update()
-
-		const neutral = this.getItemData(x => x.ItemIsNeutralDrop)
-		for (let i = 0, end = neutral.length; i < end; i++) {
-			const element = neutral[i]
-			this.NeutralItems.enabledValues.set(element, false)
-		}
-		this.NeutralItems.values = neutral
-		this.NeutralItems.Update()
-	}
-
 	protected getItemData(call: (data: AbilityData, name: string) => boolean) {
 		return Array.from(AbilityData.globalStorage.entries())
 			.filter(

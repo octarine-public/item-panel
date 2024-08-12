@@ -2,8 +2,7 @@ import {
 	ImageData,
 	LaneSelection,
 	Menu,
-	Vector2,
-	VKeys
+	Vector2
 } from "github.com/octarine-public/wrapper/index"
 
 import { HiddenItems } from "./hidden"
@@ -18,7 +17,6 @@ export class MenuManager {
 	public readonly FormatTime: Menu.Toggle
 	public readonly Opacity: Menu.Slider
 
-	public readonly Reset: Menu.Button
 	public readonly ModeKey: Menu.Dropdown
 	public readonly ToggleKey: Menu.KeyBind
 	public readonly TouchKeyPanel: Menu.KeyBind
@@ -27,8 +25,8 @@ export class MenuManager {
 	public readonly Size: Menu.Slider
 
 	public readonly Position: {
-		X: Menu.Slider
-		Y: Menu.Slider
+		readonly X: Menu.Slider
+		readonly Y: Menu.Slider
 		Vector: Vector2
 	}
 
@@ -116,27 +114,6 @@ export class MenuManager {
 			new Vector2(1920, 1080)
 		)
 
-		this.Reset = this.tree.AddButton("Reset", "Reset settings")
 		this.ToggleKey.OnRelease(() => (this.IsToggled = !this.IsToggled))
-	}
-
-	public ResetSettings() {
-		this.IsToggled = true
-		this.State.value = this.State.defaultValue
-		this.Ally.value = this.Ally.defaultValue
-		this.Charge.value = this.Charge.defaultValue
-		this.Cooldown.value = this.Cooldown.defaultValue
-		this.BackPack.value = this.BackPack.defaultValue
-		this.FormatTime.value = this.FormatTime.defaultValue
-		this.Size.value = this.Size.defaultValue
-		this.Opacity.value = this.Opacity.defaultValue
-		this.Position.X.value = this.Position.X.defaultValue
-		this.Position.Y.value = this.Position.Y.defaultValue
-		this.ModeKey.SelectedID = this.ModeKey.defaultValue
-		this.TouchKeyPanel.assignedKey = VKeys.CONTROL
-		this.TouchKeyPanel.assignedKeyStr = this.TouchKeyPanel.defaultKey
-		this.ToggleKey.assignedKey = -1
-		this.ToggleKey.assignedKeyStr = this.ToggleKey.defaultKey
-		this.HiddenItems.ResetSettings()
 	}
 }
