@@ -117,17 +117,11 @@ new (class CItemPanel {
 	}
 
 	private get scaleItemSize() {
-		return GUIInfo.ScaleVector(
-			GUIInfo.ScaleWidth(this.size * 1.3),
-			GUIInfo.ScaleHeight(this.size)
-		)
+		return GUIInfo.ScaleVector(this.size * 1.3, this.size)
 	}
 
 	private get scaleUnitImageSize() {
-		return GUIInfo.ScaleVector(
-			GUIInfo.ScaleWidth(this.size * 1.6),
-			GUIInfo.ScaleHeight(this.size)
-		)
+		return GUIInfo.ScaleVector(this.size * 1.6, this.size)
 	}
 
 	protected Draw() {
