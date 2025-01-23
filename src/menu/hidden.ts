@@ -10,7 +10,7 @@ export class HiddenItems {
 	constructor(menu: Menu.Node) {
 		const tree = menu.AddNode(
 			"Hide items",
-			ImageData.Paths.Icons.icon_close_cross_eye_hidden
+			ImageData.Icons.icon_close_cross_eye_hidden
 		)
 		tree.SortNodes = false
 		this.Passive = tree.AddToggle(

@@ -34,10 +34,7 @@ export class MenuManager {
 
 	constructor() {
 		const entries = Menu.AddEntry("Visual")
-		this.tree = entries.AddNode(
-			"Item Panel",
-			ImageData.Paths.Icons.icon_svg_hamburger
-		)
+		this.tree = entries.AddNode("Item Panel", ImageData.Icons.icon_svg_hamburger)
 
 		this.tree.SortNodes = false
 		this.State = this.tree.AddToggle("State", true)
@@ -54,7 +51,7 @@ export class MenuManager {
 			false,
 			"Show backpack",
 			-1,
-			ImageData.Paths.Icons.icon_brackets
+			ImageData.Icons.icon_brackets
 		)
 
 		this.Charge = this.tree.AddToggle(
@@ -62,14 +59,14 @@ export class MenuManager {
 			true,
 			undefined,
 			-1,
-			ImageData.Paths.Icons.icon_svg_charges
+			ImageData.Icons.icon_svg_charges
 		)
 		this.Cooldown = this.tree.AddToggle(
 			"ItemPanel_Cooldwn_State",
 			true,
 			undefined,
 			-1,
-			ImageData.Paths.Icons.icon_svg_duration
+			ImageData.Icons.icon_svg_duration
 		)
 
 		this.FormatTime = this.tree.AddToggle(
@@ -77,15 +74,12 @@ export class MenuManager {
 			false,
 			"Show cooldown format time (min:sec)",
 			-1,
-			ImageData.Paths.Icons.icon_svg_format_time
+			ImageData.Icons.icon_svg_format_time
 		)
 
 		this.HiddenItems = new HiddenItems(this.tree)
 
-		const treeBinds = this.tree.AddNode(
-			"Binds",
-			ImageData.Paths.Icons.icon_svg_keyboard
-		)
+		const treeBinds = this.tree.AddNode("Binds", ImageData.Icons.icon_svg_keyboard)
 		treeBinds.SortNodes = false
 		this.ToggleKey = treeBinds.AddKeybind("Key", "None", "Key turn on/off panel")
 		this.TouchKeyPanel = treeBinds.AddKeybind(
@@ -100,10 +94,7 @@ export class MenuManager {
 			"Key mode turn on/off panel"
 		)
 
-		const settingsTree = this.tree.AddNode(
-			"Settings",
-			ImageData.Paths.Icons.icon_settings
-		)
+		const settingsTree = this.tree.AddNode("Settings", ImageData.Icons.icon_settings)
 		settingsTree.SortNodes = false
 		this.Size = settingsTree.AddSlider("Size", 6, 0, 20)
 		this.Opacity = settingsTree.AddSlider("Opacity", 0, 0, 50)
