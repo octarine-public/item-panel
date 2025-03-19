@@ -29,6 +29,7 @@ import { UnitData } from "./unit"
 
 new (class CItemPanel {
 	private dragging = false
+	private windowReady = false
 	private readonly menu!: MenuManager
 	private readonly units = new Map<Unit, UnitData>()
 	private readonly totalPosition = new Rectangle()
@@ -51,19 +52,18 @@ new (class CItemPanel {
 		EventsSDK.on("UnitPropertyChanged", this.UnitPropertyChanged.bind(this))
 		EventsSDK.on("UnitItemsChanged", this.UnitItemsChanged.bind(this))
 		EventsSDK.on("UnitAbilityDataUpdated", this.UnitAbilityDataUpdated.bind(this))
+		EventsSDK.on("WindowSizeChanged", this.WindowSizeChanged.bind(this))
 	}
 
 	private get state() {
 		return this.menu.State.value
 	}
-
 	private get isScoreboardPosition() {
 		if (!Input.IsScoreboardOpen) {
 			return false
 		}
 		return this.shouldPosition(GUIInfo.Scoreboard.Background)
 	}
-
 	private get isShopPosition() {
 		if (!Input.IsShopOpen) {
 			return false
@@ -81,14 +81,12 @@ new (class CItemPanel {
 			GUIInfo.OpenShopLarge.ItemCombines
 		)
 	}
-
 	private get isPostGame() {
 		return (
 			GameRules === undefined ||
 			GameRules.GameState === DOTAGameState.DOTA_GAMERULES_STATE_POST_GAME
 		)
 	}
-
 	private get isToggleKeyMode() {
 		const menu = this.menu
 		const toggleKey = menu.ToggleKey
@@ -102,28 +100,22 @@ new (class CItemPanel {
 			(keyModeID === KeyMode.Pressed && !toggleKey.isPressed)
 		)
 	}
-
 	private get isInGameUI() {
 		return GameState.UIState === DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME
 	}
-
 	private get scalePositionPanel() {
 		return GUIInfo.ScaleVector(this.menu.Position.X.value, this.menu.Position.Y.value)
 	}
-
 	private get size() {
 		const min = 20
 		return Math.min(Math.max(this.menu.Size.value + min, min), min * 2)
 	}
-
 	private get scaleItemSize() {
 		return GUIInfo.ScaleVector(this.size * 1.3, this.size)
 	}
-
 	private get scaleUnitImageSize() {
 		return GUIInfo.ScaleVector(this.size * 1.6, this.size)
 	}
-
 	protected Draw() {
 		if (!this.state || !this.isInGameUI || this.isPostGame) {
 			return
@@ -180,7 +172,6 @@ new (class CItemPanel {
 			.CopyTo(positionPanel)
 		this.saveNewPosition(toPosition)
 	}
-
 	protected UnitItemsChanged(unit: Unit) {
 		if (!unit.IsValid || !this.shouldUnit(unit)) {
 			return
@@ -190,7 +181,6 @@ new (class CItemPanel {
 			getUnitData.UnitItemsChanged(this.getItems(unit))
 		}
 	}
-
 	protected EntityCreated(entity: Entity) {
 		if (!(entity instanceof Unit)) {
 			return
@@ -200,7 +190,6 @@ new (class CItemPanel {
 			getUnitData.UnitItemsChanged(this.getItems(entity))
 		}
 	}
-
 	protected EntityDestroyed(entity: Entity) {
 		if (entity instanceof Unit && this.shouldUnit(entity)) {
 			this.units.delete(entity)
@@ -223,7 +212,6 @@ new (class CItemPanel {
 		}
 		this.getUnitData(owner)?.EntityDestroyed(entity)
 	}
-
 	protected UnitPropertyChanged(unit: Unit) {
 		if (this.shouldUnit(unit)) {
 			return
@@ -234,18 +222,16 @@ new (class CItemPanel {
 		}
 		this.units.delete(unit)
 	}
-
 	protected MouseKeyUp(key: VMouseKeys) {
-		if (!this.shouldInput(key) || !this.dragging) {
+		if (!this.shouldInput(key) || !this.dragging || !this.windowReady) {
 			return true
 		}
 		this.dragging = false
 		Menu.Base.SaveConfigASAP = true
 		return true
 	}
-
 	protected MouseKeyDown(key: VMouseKeys) {
-		if (!this.shouldInput(key) || this.dragging) {
+		if (!this.shouldInput(key) || this.dragging || !this.windowReady) {
 			return true
 		}
 		const menu = this.menu.TouchKeyPanel
@@ -262,21 +248,21 @@ new (class CItemPanel {
 		mouse.Subtract(recPos.pos1).CopyTo(this.draggingOffset)
 		return false
 	}
-
 	protected GameEnded() {
 		this.restartScale()
 		this.resetTempFeature()
 	}
-
 	protected GameStarted() {
 		this.restartScale()
 		this.resetTempFeature()
 	}
-
 	protected UnitAbilityDataUpdated() {
 		this.menu.HiddenItems.UnitAbilityDataUpdated()
 	}
-
+	protected WindowSizeChanged() {
+		this.windowReady = true
+		this.restartScale()
+	}
 	private getUnitData(unit: Unit) {
 		if (!this.shouldUnit(unit)) {
 			return
@@ -292,7 +278,6 @@ new (class CItemPanel {
 		}
 		return unitData
 	}
-
 	private getItems(unit: Nullable<Unit>) {
 		if (unit === undefined) {
 			return []
@@ -310,7 +295,6 @@ new (class CItemPanel {
 				)
 			)
 	}
-
 	private backgroundDrag() {
 		const position = this.totalPosition
 		const division = position.Height / 10 - this.menu.Size.value / 3
@@ -322,22 +306,18 @@ new (class CItemPanel {
 			division
 		)
 	}
-
 	private calculateBottomSize(maxItem: number[], position: Rectangle) {
 		const maxEndItem = Math.max(...maxItem)
 		const endSize = this.scaleItemSize.x + 1 / 2
 		this.totalPosition.Width += endSize * (maxEndItem > 0 ? maxEndItem : 1)
 		this.totalPosition.Height -= position.Height - this.units.size
 	}
-
 	private shouldPosition(...positions: Rectangle[]) {
 		return positions.some(position => this.isContainsPanel(position))
 	}
-
 	private isContainsPanel(position: Rectangle) {
 		return position.Contains(this.totalPosition.pos1)
 	}
-
 	private shouldUnit(unit: Unit): unit is SpiritBear | Hero {
 		if (unit.IsIllusion || unit.IsClone || unit.IsStrongIllusion) {
 			return false
@@ -347,7 +327,6 @@ new (class CItemPanel {
 		}
 		return unit.IsHero
 	}
-
 	private shouldInput(key: VMouseKeys) {
 		if (!this.state || this.isPostGame || key !== VMouseKeys.MK_LBUTTON) {
 			return false
@@ -357,13 +336,14 @@ new (class CItemPanel {
 		}
 		return true
 	}
-
 	private resetTempFeature() {
 		this.dragging = false
 		this.draggingOffset.toZero()
 	}
-
 	private updateMinMaxPanelPosition(position: Vector2) {
+		if (!this.windowReady) {
+			return
+		}
 		const wSize = RendererSDK.WindowSize
 		const totalSize = this.totalPosition.Size
 		const newPosition = position
@@ -381,7 +361,6 @@ new (class CItemPanel {
 			.DivideScalarY(GUIInfo.GetHeightScale())
 			.RoundForThis(1)
 	}
-
 	private restartScale() {
 		this.saveNewPosition()
 	}
