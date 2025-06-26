@@ -195,7 +195,7 @@ export class UnitData {
 
 	protected ShouldDisplayItem(item: Item, costValue: number, passiveState: boolean) {
 		return (
-			(costValue <= item.Cost || item.IsNeutralDrop) &&
+			(costValue <= item.Cost || item.IsNeutralActiveDrop) &&
 			(!passiveState ||
 				!(
 					item.HasBehavior(
