@@ -80,7 +80,7 @@ export class UnitData {
 
 			if (
 				!this.ShouldDisplayItem(item, costValue, passiveState) ||
-				menu.HiddenItems.IsEnabled(item.Name)
+				menu.HiddenItems.IsEnabled(item.Name, item.AbilityData)
 			) {
 				continue
 			}

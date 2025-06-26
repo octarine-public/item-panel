@@ -32,5 +32,8 @@
 	"Hide by item cost": "Скрыть предметы с ценой меньше",
 	"Neutral items": "Нейтральные предметы",
 	"Hide passive items that\nhave no cooldown": "Скрыть пассивные предметы\nбез перезарядки",
-	"Select items\nfor hide on panel": "Выберите предметы\nдля скрытия на панели"
+	"Select items\nfor hide on panel": "Выберите предметы\nдля скрытия на панели",
+	"Hide all common items" : "Скрыть все общие предметы",
+	"Hide all rare items" : "Скрыть все редкие предметы",
+	"Hide all neutral items" : "Скрыть все нейтральные предметы"
 }
