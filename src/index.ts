@@ -27,9 +27,15 @@ import { KeyMode } from "./enums/KeyMode"
 import { MenuManager } from "./menu/index"
 import { UnitData } from "./unit"
 
+interface IConfigData {
+	Visual?: {
+		[key: string]: object | undefined
+	}
+}
 new (class CItemPanel {
 	private dragging = false
 	private windowReady = false
+	private configReady = false
 	private readonly menu!: MenuManager
 	private readonly units = new Map<Unit, UnitData>()
 	private readonly totalPosition = new Rectangle()
@@ -53,6 +59,7 @@ new (class CItemPanel {
 		EventsSDK.on("UnitItemsChanged", this.UnitItemsChanged.bind(this))
 		EventsSDK.on("UnitAbilityDataUpdated", this.UnitAbilityDataUpdated.bind(this))
 		EventsSDK.on("WindowSizeChanged", this.WindowSizeChanged.bind(this))
+		EventsSDK.on("MenuConfigChanged", this.MenuConfigChanged.bind(this))
 	}
 
 	private get state() {
@@ -262,6 +269,18 @@ new (class CItemPanel {
 	protected WindowSizeChanged() {
 		this.windowReady = true
 		this.restartScale()
+	}
+	protected MenuConfigChanged(obj: { [key: string]: any }) {
+		const config = obj as IConfigData
+		if (config.Visual === undefined) {
+			console.log("Menu config not found for visual")
+			return
+		}
+		if (config.Visual[this.menu.Tree.InternalName] === undefined) {
+			console.log("Menu config not found for item panel")
+			return
+		}
+		this.configReady = true
 	}
 	private getUnitData(unit: Unit) {
 		if (!this.shouldUnit(unit)) {
