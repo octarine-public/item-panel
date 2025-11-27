@@ -230,7 +230,10 @@ new (class CItemPanel {
 		this.units.delete(unit)
 	}
 	protected MouseKeyUp(key: VMouseKeys) {
-		if (!this.shouldInput(key) || !this.dragging || !this.windowReady) {
+		if (!this.shouldInput(key) || !this.dragging) {
+			return true
+		}
+		if (!this.windowReady || !this.configReady) {
 			return true
 		}
 		this.dragging = false
@@ -238,7 +241,10 @@ new (class CItemPanel {
 		return true
 	}
 	protected MouseKeyDown(key: VMouseKeys) {
-		if (!this.shouldInput(key) || this.dragging || !this.windowReady) {
+		if (!this.shouldInput(key) || this.dragging) {
+			return true
+		}
+		if (!this.windowReady || !this.configReady) {
 			return true
 		}
 		const menu = this.menu.TouchKeyPanel
@@ -360,7 +366,7 @@ new (class CItemPanel {
 		this.draggingOffset.toZero()
 	}
 	private updateMinMaxPanelPosition(position: Vector2) {
-		if (!this.windowReady) {
+		if (!this.windowReady || !this.configReady) {
 			return
 		}
 		const wSize = RendererSDK.WindowSize
@@ -373,6 +379,9 @@ new (class CItemPanel {
 	}
 
 	private saveNewPosition(newPosition?: Vector2) {
+		if (!this.windowReady || !this.configReady) {
+			return
+		}
 		const position = newPosition ?? this.scalePositionPanel
 		this.menu.Position.Vector = position
 			.Clone()
