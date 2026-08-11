@@ -1,9 +1,3 @@
-import {
-	ImageData,
-	LaneSelection,
-	Menu,
-	Vector2
-} from "github.com/octarine-public/wrapper/index"
 
 import { HiddenItems } from "./hidden"
 

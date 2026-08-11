@@ -1,18 +1,3 @@
-import {
-	Color,
-	DOTA_ABILITY_BEHAVIOR,
-	DOTAScriptInventorySlot,
-	GUIInfo,
-	ImageData,
-	Item,
-	item_tpscroll,
-	MathSDK,
-	Rectangle,
-	RendererSDK,
-	TextFlags,
-	Unit,
-	Vector2
-} from "github.com/octarine-public/wrapper/index"
 
 import { MenuManager } from "./menu"
 
@@ -138,7 +123,7 @@ export class UnitData {
 		if (cooldown > 0 && menu.Cooldown.value) {
 			const text =
 				menu.FormatTime.value && cooldown >= 60
-					? MathSDK.FormatTime(cooldown)
+					? Math.formatTime(cooldown)
 					: cooldown.toFixed()
 			RendererSDK.FilledRect(position.pos1, position.Size, Color.Black.SetA(100))
 			RendererSDK.TextByFlags(

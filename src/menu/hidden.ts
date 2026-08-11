@@ -1,4 +1,3 @@
-import { AbilityData, ImageData, Menu } from "github.com/octarine-public/wrapper/index"
 
 export class HiddenItems {
 	public readonly Cost: Menu.Slider

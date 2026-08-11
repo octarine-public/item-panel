@@ -1,28 +1,5 @@
 import "./translations"
 
-import {
-	Color,
-	DOTAGameState,
-	DOTAGameUIState,
-	DOTAScriptInventorySlot,
-	Entity,
-	EventsSDK,
-	GameRules,
-	GameState,
-	GUIInfo,
-	Hero,
-	Input,
-	InputEventSDK,
-	Item,
-	Menu,
-	Rectangle,
-	RendererSDK,
-	SpiritBear,
-	Unit,
-	Vector2,
-	VMouseKeys
-} from "github.com/octarine-public/wrapper/index"
-
 import { KeyMode } from "./enums/KeyMode"
 import { MenuManager } from "./menu/index"
 import { UnitData } from "./unit"
@@ -66,13 +43,13 @@ new (class CItemPanel {
 		return this.menu.State.value
 	}
 	private get isScoreboardPosition() {
-		if (!Input.IsScoreboardOpen) {
+		if (!InputManager.IsScoreboardOpen) {
 			return false
 		}
 		return this.shouldPosition(GUIInfo.Scoreboard.Background)
 	}
 	private get isShopPosition() {
-		if (!Input.IsShopOpen) {
+		if (!InputManager.IsShopOpen) {
 			return false
 		}
 		return this.shouldPosition(
@@ -90,8 +67,8 @@ new (class CItemPanel {
 	}
 	private get isPostGame() {
 		return (
-			GameRules === undefined ||
-			GameRules.GameState === DOTAGameState.DOTA_GAMERULES_STATE_POST_GAME
+			Dota2SDK.GameRules === undefined ||
+			Dota2SDK.GameRules.GameState === DOTAGameState.DOTA_GAMERULES_STATE_POST_GAME
 		)
 	}
 	private get isToggleKeyMode() {
@@ -171,7 +148,7 @@ new (class CItemPanel {
 
 		this.backgroundDrag()
 		const wSize = RendererSDK.WindowSize
-		const mousePos = Input.CursorOnScreen
+		const mousePos = InputManager.CursorOnScreen
 		const toPosition = mousePos
 			.SubtractForThis(this.draggingOffset)
 			.Min(wSize.Subtract(this.totalPosition.Size))
@@ -252,7 +229,7 @@ new (class CItemPanel {
 		if (!isTouch) {
 			return true
 		}
-		const mouse = Input.CursorOnScreen
+		const mouse = InputManager.CursorOnScreen
 		const recPos = this.totalPosition
 		if (!mouse.IsUnderRectangle(recPos.x, recPos.y, recPos.Width, recPos.Height)) {
 			return true
