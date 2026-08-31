@@ -1,4 +1,3 @@
-
 import { HiddenItems } from "./hidden"
 
 export class MenuManager {
@@ -9,21 +8,14 @@ export class MenuManager {
 	public readonly BackPack: Menu.Toggle
 	public readonly Cooldown: Menu.Toggle
 	public readonly FormatTime: Menu.Toggle
-	public readonly Opacity: Menu.Slider
 
 	public readonly ModeKey: Menu.Dropdown
 	public readonly ToggleKey: Menu.KeyBind
 	public readonly TouchKeyPanel: Menu.KeyBind
 	public readonly HiddenItems: HiddenItems
 
-	public readonly Size: Menu.Slider
+	public readonly Overlay: MenuSDK.OverlayMenu
 	public readonly Tree: Menu.Node
-
-	public readonly Position: {
-		readonly X: Menu.Slider
-		readonly Y: Menu.Slider
-		Vector: Vector2
-	}
 
 	private readonly entries = Menu.AddEntry("Visual")
 
@@ -88,17 +80,14 @@ export class MenuManager {
 			"Key mode turn on/off panel"
 		)
 
-		const settingsTree = this.Tree.AddNode("Settings", ImageData.Icons.icon_settings)
-		settingsTree.SortNodes = false
-		this.Size = settingsTree.AddSlider("Size", 6, 0, 20)
-		this.Opacity = settingsTree.AddSlider("Opacity", 0, 0, 50)
-		this.Position = this.Tree.AddVector2(
-			"Settings",
-			new Vector2(0, 547),
-			new Vector2(0, 0),
-			new Vector2(1920, 1080)
-		)
+		this.Overlay = new MenuSDK.OverlayMenu(this.Tree, 0, 547)
 
 		this.ToggleKey.OnRelease(() => (this.IsToggled = !this.IsToggled))
+		this.State.OnValue(control => this.Overlay.SetHidden(!control.value))
+		this.Overlay.SetHidden(!this.State.value)
+	}
+
+	public get IsOpen(): boolean {
+		return MenuSDK.MenuManager.IsOpen && this.Tree.IsOpen
 	}
 }

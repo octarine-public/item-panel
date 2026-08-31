@@ -1,28 +1,22 @@
 import "./translations"
 
 import { KeyMode } from "./enums/KeyMode"
+import { GUIHelper } from "./gui"
 import { MenuManager } from "./menu/index"
 import { UnitData } from "./unit"
 
-interface IConfigData {
-	Visual?: {
-		[key: string]: object | undefined
-	}
-}
 new (class CItemPanel {
-	private dragging = false
-	private windowReady = false
-	private configReady = false
 	private readonly menu!: MenuManager
+	private readonly gui!: GUIHelper
 	private readonly units = new Map<Unit, UnitData>()
-	private readonly totalPosition = new Rectangle()
-	private readonly draggingOffset = new Vector2()
+	private readonly rows: UnitData[] = []
 
 	constructor(canBeInitialized: boolean) {
 		if (!canBeInitialized) {
 			return
 		}
 		this.menu = new MenuManager()
+		this.gui = new GUIHelper(this.menu)
 
 		InputEventSDK.on("MouseKeyUp", this.MouseKeyUp.bind(this))
 		InputEventSDK.on("MouseKeyDown", this.MouseKeyDown.bind(this))
@@ -35,35 +29,10 @@ new (class CItemPanel {
 		EventsSDK.on("UnitPropertyChanged", this.UnitPropertyChanged.bind(this))
 		EventsSDK.on("UnitItemsChanged", this.UnitItemsChanged.bind(this))
 		EventsSDK.on("UnitAbilityDataUpdated", this.UnitAbilityDataUpdated.bind(this))
-		EventsSDK.on("WindowSizeChanged", this.WindowSizeChanged.bind(this))
-		EventsSDK.on("MenuConfigChanged", this.MenuConfigChanged.bind(this))
 	}
 
 	private get state() {
 		return this.menu.State.value
-	}
-	private get isScoreboardPosition() {
-		if (!InputManager.IsScoreboardOpen) {
-			return false
-		}
-		return this.shouldPosition(GUIInfo.Scoreboard.Background)
-	}
-	private get isShopPosition() {
-		if (!InputManager.IsShopOpen) {
-			return false
-		}
-		return this.shouldPosition(
-			GUIInfo.OpenShopMini.Items,
-			GUIInfo.OpenShopMini.Header,
-			GUIInfo.OpenShopMini.GuideFlyout,
-			GUIInfo.OpenShopMini.ItemCombines,
-			GUIInfo.OpenShopMini.PinnedItems,
-			GUIInfo.OpenShopLarge.Items,
-			GUIInfo.OpenShopLarge.Header,
-			GUIInfo.OpenShopLarge.GuideFlyout,
-			GUIInfo.OpenShopLarge.PinnedItems,
-			GUIInfo.OpenShopLarge.ItemCombines
-		)
 	}
 	private get isPostGame() {
 		return (
@@ -74,7 +43,6 @@ new (class CItemPanel {
 	private get isToggleKeyMode() {
 		const menu = this.menu
 		const toggleKey = menu.ToggleKey
-		// if toggle key is not assigned (setting to "None")
 		if (toggleKey.assignedKey < 0) {
 			return false
 		}
@@ -87,74 +55,30 @@ new (class CItemPanel {
 	private get isInGameUI() {
 		return GameState.UIState === DOTAGameUIState.DOTA_GAME_UI_DOTA_INGAME
 	}
-	private get scalePositionPanel() {
-		return GUIInfo.ScaleVector(this.menu.Position.X.value, this.menu.Position.Y.value)
+	private get canDrawLive() {
+		return this.isInGameUI && !this.isPostGame && !this.isToggleKeyMode
 	}
-	private get size() {
-		const min = 20
-		return Math.min(Math.max(this.menu.Size.value + min, min), min * 2)
-	}
-	private get scaleItemSize() {
-		return GUIInfo.ScaleVector(this.size * 1.3, this.size)
-	}
-	private get scaleUnitImageSize() {
-		return GUIInfo.ScaleVector(this.size * 1.6, this.size)
+	private get isTouchMode() {
+		const touchKey = this.menu.TouchKeyPanel
+		return touchKey.isPressed || touchKey.assignedKey === -1
 	}
 	protected Draw() {
-		if (!this.state || !this.isInGameUI || this.isPostGame) {
+		if (!this.state) {
+			this.gui.Reset()
 			return
 		}
-		if (GameState.IsInputCaptured || this.isShopPosition) {
+		if (this.canDrawLive) {
+			const maxItems = this.collectRows()
+			if (this.rows.length > 0) {
+				this.gui.Draw(this.rows, maxItems)
+				return
+			}
+		}
+		if (this.menu.IsOpen) {
+			this.gui.DrawPreview()
 			return
 		}
-		if (this.isScoreboardPosition || this.isToggleKeyMode) {
-			return
-		}
-		const gap = 2
-		const menu = this.menu
-		const maxItem: number[] = []
-		const position = new Rectangle()
-
-		const positionPanel = this.scalePositionPanel
-		const unitImageSize = this.scaleUnitImageSize
-
-		position.x = positionPanel.x
-		position.y = positionPanel.y
-		position.Width = unitImageSize.x
-		position.Height = unitImageSize.y
-
-		this.totalPosition.pos1.CopyFrom(position.pos1)
-		this.totalPosition.pos2.CopyFrom(position.pos2)
-
-		this.units.forEach(data =>
-			data.Draw(
-				gap,
-				menu,
-				maxItem,
-				position,
-				this.dragging,
-				this.totalPosition,
-				this.scaleItemSize
-			)
-		)
-
-		this.calculateBottomSize(maxItem, position)
-
-		if (!this.dragging) {
-			// NOTE: update full panel if added new unit's or items
-			this.updateMinMaxPanelPosition(positionPanel)
-			return
-		}
-
-		this.backgroundDrag()
-		const wSize = RendererSDK.WindowSize
-		const mousePos = InputManager.CursorOnScreen
-		const toPosition = mousePos
-			.SubtractForThis(this.draggingOffset)
-			.Min(wSize.Subtract(this.totalPosition.Size))
-			.Max(0)
-			.CopyTo(positionPanel)
-		this.saveNewPosition(toPosition)
+		this.gui.Reset()
 	}
 	protected UnitItemsChanged(unit: Unit) {
 		if (!unit.IsValid || !this.shouldUnit(unit)) {
@@ -207,63 +131,42 @@ new (class CItemPanel {
 		this.units.delete(unit)
 	}
 	protected MouseKeyUp(key: VMouseKeys) {
-		if (!this.shouldInput(key) || !this.dragging) {
+		if (!this.shouldInput(key)) {
 			return true
 		}
-		if (!this.windowReady || !this.configReady) {
-			return true
-		}
-		this.dragging = false
-		Menu.Base.SaveConfigASAP = true
-		return true
+		return this.gui.MouseKeyUp(key)
 	}
 	protected MouseKeyDown(key: VMouseKeys) {
-		if (!this.shouldInput(key) || this.dragging) {
+		if (!this.shouldInput(key)) {
 			return true
 		}
-		if (!this.windowReady || !this.configReady) {
+		if (key === VMouseKeys.MK_LBUTTON && !this.isTouchMode) {
 			return true
 		}
-		const menu = this.menu.TouchKeyPanel
-		const isTouch = menu.isPressed || menu.assignedKey === -1
-		if (!isTouch) {
-			return true
-		}
-		const mouse = InputManager.CursorOnScreen
-		const recPos = this.totalPosition
-		if (!mouse.IsUnderRectangle(recPos.x, recPos.y, recPos.Width, recPos.Height)) {
-			return true
-		}
-		this.dragging = true
-		mouse.Subtract(recPos.pos1).CopyTo(this.draggingOffset)
-		return false
+		return this.gui.MouseKeyDown(key)
 	}
 	protected GameEnded() {
-		this.restartScale()
-		this.resetTempFeature()
+		this.gui.Reset()
 	}
 	protected GameStarted() {
-		this.restartScale()
-		this.resetTempFeature()
+		this.gui.Reset()
 	}
 	protected UnitAbilityDataUpdated() {
 		this.menu.HiddenItems.UnitAbilityDataUpdated()
 	}
-	protected WindowSizeChanged() {
-		this.windowReady = true
-		this.restartScale()
-	}
-	protected MenuConfigChanged(obj: { [key: string]: any }) {
-		const config = obj as IConfigData
-		if (config.Visual === undefined) {
-			console.log("Menu config not found for visual")
-			return
+	private collectRows() {
+		const rows = this.rows
+		rows.length = 0
+		let maxItems = 0
+		const showAlly = this.menu.Ally.value
+		for (const data of this.units.values()) {
+			if (!showAlly && !data.Owner.IsEnemy()) {
+				continue
+			}
+			maxItems = Math.max(maxItems, data.CollectVisible(this.menu))
+			rows.push(data)
 		}
-		if (config.Visual[this.menu.Tree.InternalName] === undefined) {
-			console.log("Menu config not found for item panel")
-			return
-		}
-		this.configReady = true
+		return maxItems
 	}
 	private getUnitData(unit: Unit) {
 		if (!this.shouldUnit(unit)) {
@@ -297,29 +200,6 @@ new (class CItemPanel {
 				)
 			)
 	}
-	private backgroundDrag() {
-		const position = this.totalPosition
-		const division = position.Height / 10 - this.menu.Size.value / 3
-		RendererSDK.FilledRect(position.pos1, position.Size, Color.Black.SetA(100))
-		RendererSDK.TextByFlags(
-			Menu.Localization.Localize("ItemPanel_Drag"),
-			position,
-			Color.White,
-			division
-		)
-	}
-	private calculateBottomSize(maxItem: number[], position: Rectangle) {
-		const maxEndItem = Math.max(...maxItem)
-		const endSize = this.scaleItemSize.x + 1 / 2
-		this.totalPosition.Width += endSize * (maxEndItem > 0 ? maxEndItem : 1)
-		this.totalPosition.Height -= position.Height - this.units.size
-	}
-	private shouldPosition(...positions: Rectangle[]) {
-		return positions.some(position => this.isContainsPanel(position))
-	}
-	private isContainsPanel(position: Rectangle) {
-		return position.Contains(this.totalPosition.pos1)
-	}
 	private shouldUnit(unit: Unit): unit is SpiritBear | Hero {
 		if (unit.IsIllusion || unit.IsClone || unit.IsStrongIllusion) {
 			return false
@@ -330,43 +210,12 @@ new (class CItemPanel {
 		return unit.IsHero
 	}
 	private shouldInput(key: VMouseKeys) {
-		if (!this.state || this.isPostGame || key !== VMouseKeys.MK_LBUTTON) {
+		if (!this.state) {
 			return false
 		}
-		if (!this.isInGameUI) {
+		if (key !== VMouseKeys.MK_LBUTTON && key !== VMouseKeys.MK_RBUTTON) {
 			return false
 		}
-		return true
-	}
-	private resetTempFeature() {
-		this.dragging = false
-		this.draggingOffset.toZero()
-	}
-	private updateMinMaxPanelPosition(position: Vector2) {
-		if (!this.windowReady || !this.configReady) {
-			return
-		}
-		const wSize = RendererSDK.WindowSize
-		const totalSize = this.totalPosition.Size
-		const newPosition = position
-			.Min(wSize.Subtract(totalSize))
-			.Max(0)
-			.CopyTo(position)
-		this.saveNewPosition(newPosition)
-	}
-
-	private saveNewPosition(newPosition?: Vector2) {
-		if (!this.windowReady || !this.configReady) {
-			return
-		}
-		const position = newPosition ?? this.scalePositionPanel
-		this.menu.Position.Vector = position
-			.Clone()
-			.DivideScalarX(GUIInfo.GetWidthScale())
-			.DivideScalarY(GUIInfo.GetHeightScale())
-			.RoundForThis(1)
-	}
-	private restartScale() {
-		this.saveNewPosition()
+		return this.canDrawLive || this.menu.IsOpen
 	}
 })(true)
