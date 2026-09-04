@@ -3,6 +3,7 @@
 	"name": "item-panel",
 	"main": "src/index.ts",
 	"description": "Item panel",
+	"octarineBundle": true,
 	"devDependencies": {
 		"@typescript-eslint/eslint-plugin": "^7.12.0",
 		"@typescript-eslint/parser": "^7.12.0",
