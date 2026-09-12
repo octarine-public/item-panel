@@ -24,7 +24,7 @@ export class UnitData {
 		for (let index = items.length - 1; index > -1; index--) {
 			const item = items[index]
 			if (!item.IsValid) {
-				items.splice(index, 1)
+				items.remove(item)
 				continue
 			}
 			if (!backPack && IsBackpackSlot(item)) {

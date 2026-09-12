@@ -34,5 +34,8 @@
 		"type": "git",
 		"directory": "/",
 		"url": "https://github.com/octarine-public/item-panel.git"
-	}
+	},
+	"octarineMinimize": true,
+	"octarineObfuscate": true,
+	"octarineTreeShaking": true
 }
