@@ -23,6 +23,10 @@ export class UnitData {
 		const items = this.items
 		for (let index = items.length - 1; index > -1; index--) {
 			const item = items[index]
+			if (!item.IsValid) {
+				items.splice(index, 1)
+				continue
+			}
 			if (!backPack && IsBackpackSlot(item)) {
 				continue
 			}
@@ -44,7 +48,7 @@ export class UnitData {
 
 	public EntityDestroyed(item: Item) {
 		this.items.remove(item)
-		this.sortItems()
+		this.visible.remove(item)
 	}
 
 	protected ShouldDisplayItem(item: Item, costValue: number, passiveState: boolean) {

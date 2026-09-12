@@ -6,18 +6,12 @@ import { MenuManager } from "./menu/index"
 import { UnitData } from "./unit"
 
 new (class CItemPanel {
-	private readonly menu!: MenuManager
-	private readonly gui!: GUIHelper
+	private readonly menu = new MenuManager()
+	private readonly gui = new GUIHelper(this.menu)
 	private readonly units = new Map<Unit, UnitData>()
 	private readonly rows: UnitData[] = []
 
-	constructor(canBeInitialized: boolean) {
-		if (!canBeInitialized) {
-			return
-		}
-		this.menu = new MenuManager()
-		this.gui = new GUIHelper(this.menu)
-
+	constructor() {
 		InputEventSDK.on("MouseKeyUp", this.MouseKeyUp.bind(this))
 		InputEventSDK.on("MouseKeyDown", this.MouseKeyDown.bind(this))
 
@@ -43,7 +37,7 @@ new (class CItemPanel {
 	private get isToggleKeyMode() {
 		const menu = this.menu
 		const toggleKey = menu.ToggleKey
-		if (toggleKey.assignedKey < 0) {
+		if (toggleKey.assignedKey <= 0) {
 			return false
 		}
 		const keyModeID = menu.ModeKey.SelectedID
@@ -60,7 +54,7 @@ new (class CItemPanel {
 	}
 	private get isTouchMode() {
 		const touchKey = this.menu.TouchKeyPanel
-		return touchKey.isPressed || touchKey.assignedKey === -1
+		return touchKey.isPressed || touchKey.assignedKey <= 0
 	}
 	protected Draw() {
 		if (!this.state) {
@@ -99,26 +93,15 @@ new (class CItemPanel {
 		}
 	}
 	protected EntityDestroyed(entity: Entity) {
-		if (entity instanceof Unit && this.shouldUnit(entity)) {
+		if (entity instanceof Unit) {
 			this.units.delete(entity)
 		}
 		if (!(entity instanceof Item)) {
 			return
 		}
-		let owner = entity.Owner
-		if (owner === undefined) {
-			return
+		for (const unit of this.units.values()) {
+			unit.EntityDestroyed(entity)
 		}
-		if (!(owner instanceof Hero || owner instanceof SpiritBear)) {
-			owner = owner.Owner as Nullable<Unit>
-		}
-		if (
-			!(owner instanceof Hero || owner instanceof SpiritBear) ||
-			(entity instanceof Hero && !entity.IsRealHero)
-		) {
-			return
-		}
-		this.getUnitData(owner)?.EntityDestroyed(entity)
 	}
 	protected UnitPropertyChanged(unit: Unit) {
 		if (this.shouldUnit(unit)) {
@@ -146,6 +129,8 @@ new (class CItemPanel {
 		return this.gui.MouseKeyDown(key)
 	}
 	protected GameEnded() {
+		this.units.clear()
+		this.rows.length = 0
 		this.gui.Reset()
 	}
 	protected GameStarted() {
@@ -160,6 +145,10 @@ new (class CItemPanel {
 		let maxItems = 0
 		const showAlly = this.menu.Ally.value
 		for (const data of this.units.values()) {
+			if (!data.Owner.IsValid) {
+				this.units.delete(data.Owner)
+				continue
+			}
 			if (!showAlly && !data.Owner.IsEnemy()) {
 				continue
 			}
@@ -218,4 +207,4 @@ new (class CItemPanel {
 		}
 		return this.canDrawLive || this.menu.IsOpen
 	}
-})(true)
+})()
