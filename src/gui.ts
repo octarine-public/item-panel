@@ -1,16 +1,37 @@
+import { easeOut, easeOutBack, ISlotMotion, SlotMotion } from "./animation"
 import { MenuManager } from "./menu"
 import { IsBackpackSlot, UnitData } from "./unit"
 
 const ROW_HEIGHT = 26
 const HERO_WIDTH = 42
-const ITEM_WIDTH = 34
-const ROW_GAP = 4
-const ITEM_GAP = 3
-const INSET = 2
+const ITEM_WIDTH = 36
+const ROW_GAP = 2
+const ITEM_GAP = 2
+const INSET = 1
 const STRIP_WIDTH = 2
 const RADIUS = 5
 const COOLDOWN_FONT = 11
 const CHARGES_FONT = 10
+
+/** What a cell is scaled to as its entrance starts: it grows into its slot, it does not blink on. */
+const POP_FROM = 0.7
+/** The share of the entrance spent fading in, so a cell is solid well before it stops moving. */
+const POP_FADE = 0.55
+/** How far past a cell's edge its ring has been thrown by the time it is gone, in dp. */
+const PING_SPREAD = 4
+/** The accent wash over the face of a cell that has just landed, at its brightest. */
+const PING_TINT = 90
+/** The accent the ring itself is struck in. */
+const PING_EDGE = 235
+/** How much of the ring's life it holds full strength for before it starts to go. */
+const PING_HOLD = 1.5
+
+/** How long the preview takes to drop a cell and bring it back, in seconds. */
+const PREVIEW_CYCLE = 4
+/** The share of that cycle the cell spends away - long enough to read the row without it. */
+const PREVIEW_AWAY = 0.28
+/** How far the next row's cycle is pushed off the one above it, so they do not arrive together. */
+const PREVIEW_OFFSET = 0.5
 
 const BLACK = Color.Black
 const DIRE_COLORS = Color.PlayerColorDire
@@ -91,8 +112,23 @@ const PREVIEW_ROWS: IPreviewRow[] = [
 	}
 ]
 
+/** How many of a preview row's cells the panel's own filters leave standing. */
+function previewCount(row: IPreviewRow, backPack: boolean): number {
+	let count = 0
+	for (const item of row.items) {
+		if (backPack || !item.backpack) {
+			count++
+		}
+	}
+	return count
+}
+
+/** Whether a preview row's last cell is away this instant, on the stage's own cycle. */
+function previewAway(now: number, index: number): boolean {
+	return (now / PREVIEW_CYCLE + index * PREVIEW_OFFSET) % 1 < PREVIEW_AWAY
+}
+
 export class GUIHelper {
-	private pad = 0
 	private inset = 0
 	private radius = 0
 	private rowGap = 0
@@ -101,61 +137,90 @@ export class GUIHelper {
 	private heroWidth = 0
 	private itemWidth = 0
 	private stripWidth = 0
+	/** The fade the panel itself is drawn at, held while one cell is faded by its own entrance. */
+	private outerAlpha = 1
 	private rows: UnitData[] = []
 	private readonly size = new Vector2()
-	private readonly box = new Rectangle()
 	private readonly imagePos = new Vector2()
 	private readonly imageSize = new Vector2()
+	private readonly motion = new SlotMotion()
+	private readonly previewMotion = new SlotMotion()
 	private readonly panel: MenuSDK.OverlayPanel
 
 	private readonly drawContent = (origin: Vector2) => {
-		this.frame(origin)
+		const motion = this.motion
 		const rows = this.rows
+		motion.Begin(MenuSDK.DrawClock(false), this.menu.Animation.value)
 		for (let index = 0; index < rows.length; index++) {
 			const data = rows[index]
 			const unit = data.Owner
-			const y = this.rowTop(index)
+			const line = motion.Place(data, index)
+			const y = this.rowTop(origin, line.slot)
 			this.hero(
 				unit.TexturePath() ?? ImageData.GetUnitTexture(unit.Name) ?? "",
 				unit.Color,
-				y
+				origin.x,
+				y,
+				line
 			)
-			let x = this.box.x + this.pad + this.heroWidth + this.itemGap
-			for (const item of data.visible) {
-				x = this.item(
+			const items = data.visible
+			for (let slot = 0; slot < items.length; slot++) {
+				const item = items[slot]
+				const cell = motion.Place(item, slot)
+				this.item(
 					item.TexturePath,
 					Math.round(item.Cooldown),
 					item.CurrentCharges,
 					IsBackpackSlot(item),
-					x,
-					y
+					this.slotX(origin.x, cell.slot),
+					y,
+					cell
 				)
 			}
 		}
+		motion.End()
 	}
 
 	private readonly drawPreview = (origin: Vector2) => {
-		this.frame(origin)
-		const backPack = this.menu.BackPack.value
+		const menu = this.menu
+		const motion = this.previewMotion
+		const backPack = menu.BackPack.value
+		const now = MenuSDK.PreviewClock()
+		// the stage takes a cell away and brings it back, so the entrance this page is about is
+		// there to watch; a stage held still, like a panel with the motion off, keeps its row whole
+		// and stands its cells where they are: its clock has stopped, and an entrance timed against
+		// a clock that does not run would never end
+		const cycling = menu.Animation.value && MenuSDK.PreviewMotion.value
+		motion.Begin(now, cycling)
 		for (let index = 0; index < PREVIEW_ROWS.length; index++) {
 			const row = PREVIEW_ROWS[index]
-			const y = this.rowTop(index)
-			this.hero(row.texture, row.color, y)
-			let x = this.box.x + this.pad + this.heroWidth + this.itemGap
+			const line = motion.Place(row, index)
+			const y = this.rowTop(origin, line.slot)
+			this.hero(row.texture, row.color, origin.x, y, line)
+			const count = previewCount(row, backPack)
+			const shown = cycling && previewAway(now, index) ? count - 1 : count
+			let slot = 0
 			for (const item of row.items) {
 				if (!backPack && item.backpack) {
 					continue
 				}
-				x = this.item(
+				if (slot >= shown) {
+					break
+				}
+				const cell = motion.Place(item, slot)
+				this.item(
 					item.texture,
 					item.cooldown,
 					item.charges,
 					item.backpack,
-					x,
-					y
+					this.slotX(origin.x, cell.slot),
+					y,
+					cell
 				)
+				slot++
 			}
 		}
+		motion.End()
 	}
 
 	constructor(private readonly menu: MenuManager) {
@@ -176,13 +241,7 @@ export class GUIHelper {
 		const backPack = this.menu.BackPack.value
 		let maxItems = 0
 		for (const row of PREVIEW_ROWS) {
-			let count = 0
-			for (const item of row.items) {
-				if (backPack || !item.backpack) {
-					count++
-				}
-			}
-			maxItems = Math.max(maxItems, count)
+			maxItems = Math.max(maxItems, previewCount(row, backPack))
 		}
 		this.measure(PREVIEW_ROWS.length, maxItems)
 		this.panel.Draw(this.size, this.drawPreview)
@@ -197,12 +256,13 @@ export class GUIHelper {
 	}
 
 	public Reset(): void {
+		this.motion.Reset()
+		this.previewMotion.Reset()
 		this.panel.Reset()
 	}
 
 	private measure(rowCount: number, maxItems: number): void {
 		MenuSDK.setHudScale(this.panel.Scale)
-		this.pad = MenuSDK.hudW(MenuSDK.HudCard.Pad)
 		this.rowGap = MenuSDK.hudH(ROW_GAP)
 		this.itemGap = MenuSDK.hudW(ITEM_GAP)
 		this.rowHeight = MenuSDK.hudH(ROW_HEIGHT)
@@ -213,58 +273,128 @@ export class GUIHelper {
 		this.stripWidth = Math.max(Math.round(MenuSDK.hudW(STRIP_WIDTH)), 1)
 		const slots = Math.max(maxItems, 1)
 		this.size.SetVector(
+			Math.round(this.heroWidth + (this.itemGap + this.itemWidth) * slots),
 			Math.round(
-				this.pad * 2 + this.heroWidth + (this.itemGap + this.itemWidth) * slots
-			),
-			Math.round(
-				this.pad * 2 +
-					this.rowHeight * rowCount +
-					this.rowGap * Math.max(rowCount - 1, 0)
+				this.rowHeight * rowCount + this.rowGap * Math.max(rowCount - 1, 0)
 			)
 		)
 	}
 
-	private frame(origin: Vector2): void {
-		const box = this.box
-		box.pos1.CopyFrom(origin)
-		box.pos2.SetVector(origin.x + this.size.x, origin.y + this.size.y)
-		MenuSDK.HudCard.Frame(box)
+	private rowTop(origin: Vector2, index: number): number {
+		return origin.y + (this.rowHeight + this.rowGap) * index
 	}
 
-	private rowTop(index: number): number {
-		return this.box.y + this.pad + (this.rowHeight + this.rowGap) * index
+	/** Where the cell in column `slot` starts - a fraction of one while the row is still reflowing. */
+	private slotX(originX: number, slot: number): number {
+		return (
+			originX +
+			this.heroWidth +
+			this.itemGap +
+			(this.itemWidth + this.itemGap) * slot
+		)
 	}
 
-	private hero(texture: string, color: Color, y: number): void {
-		const x = this.box.x + this.pad
-		const inset = this.inset
+	/**
+	 * Fades everything a cell is about to draw by how far into its entrance it is, and answers how
+	 * far its box is shrunk for it. The fade goes on the surface rather than into every call, so
+	 * the readings on the cell - a cooldown, a charge count - come in with the plate under them and
+	 * nothing has to carry the entrance by hand.
+	 */
+	private enter(motion: ISlotMotion): number {
+		const appear = motion.appear
+		this.outerAlpha = MenuSDK.HudAlphaScale()
+		if (appear >= 1) {
+			return 1
+		}
+		MenuSDK.SetHudAlphaScale(
+			this.outerAlpha * easeOut(Math.min(appear / POP_FADE, 1))
+		)
+		return POP_FROM + (1 - POP_FROM) * easeOutBack(appear)
+	}
+
+	/** Hands the panel's own fade back, so the next cell starts from it and not from this one's. */
+	private leave(): void {
+		MenuSDK.SetHudAlphaScale(this.outerAlpha)
+	}
+
+	/**
+	 * The ring a cell that has just landed wears: an accent wash over its face and a rim struck on
+	 * its edge, thrown clear of it and faded as the moment passes. This is what says a new item,
+	 * rather than a row that happens to be one cell wider than it was a second ago.
+	 */
+	private ping(
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		scale: number,
+		flash: number
+	): void {
+		if (flash <= 0) {
+			return
+		}
+		const spread = PING_SPREAD * easeOut(1 - flash)
+		const growX = MenuSDK.hudW(spread)
+		const growY = MenuSDK.hudH(spread)
+		MenuSDK.HudCard.Chip(
+			x - growX,
+			y - growY,
+			width + growX * 2,
+			height + growY * 2,
+			RADIUS * scale + spread,
+			MenuSDK.HudColors.accent,
+			MenuSDK.hudAlpha(PING_TINT * flash * flash),
+			MenuSDK.hudAlpha(PING_EDGE * Math.min(flash * PING_HOLD, 1))
+		)
+	}
+
+	private hero(
+		texture: string,
+		color: Color,
+		x: number,
+		y: number,
+		motion: ISlotMotion
+	): void {
+		if (motion.appear <= 0) {
+			return
+		}
+		const scale = this.enter(motion)
+		const width = this.heroWidth * scale
+		const height = this.rowHeight * scale
+		const left = x + (this.heroWidth - width) / 2
+		const top = y + (this.rowHeight - height) / 2
+		const inset = Math.max(this.inset * scale, 1)
+		const radius = this.radius * scale
 		MenuSDK.HudCard.Plate(
-			x,
-			y,
-			this.heroWidth,
-			this.rowHeight,
-			this.radius,
+			left,
+			top,
+			width,
+			height,
+			radius,
 			BLACK,
 			MenuSDK.hudAlpha(180)
 		)
-		this.imagePos.SetVector(x + inset, y + inset)
-		this.imageSize.SetVector(this.heroWidth - inset * 2, this.rowHeight - inset * 2)
+		this.imagePos.SetVector(left + inset, top + inset)
+		this.imageSize.SetVector(width - inset * 2, height - inset * 2)
 		MenuSDK.HudCard.Image(
 			texture,
 			this.imagePos,
 			this.imageSize,
 			Color.WhiteReadonly,
 			MenuSDK.hudAlpha(),
-			Math.max(this.radius - inset, 0)
+			Math.max(radius - inset, 0),
+			0,
+			"cover"
 		)
 		MenuSDK.HudCard.Fill(
-			x + inset,
-			y + inset,
-			this.stripWidth,
-			this.rowHeight - inset * 2,
+			left + inset,
+			top + inset,
+			Math.max(this.stripWidth * scale, 1),
+			height - inset * 2,
 			MenuSDK.HudColors.readable(color),
 			MenuSDK.hudAlpha()
 		)
+		this.leave()
 	}
 
 	private item(
@@ -273,65 +403,77 @@ export class GUIHelper {
 		charges: number,
 		backpack: boolean,
 		x: number,
-		y: number
-	): number {
+		y: number,
+		motion: ISlotMotion
+	): void {
+		if (motion.appear <= 0) {
+			return
+		}
 		const menu = this.menu
-		const inset = this.inset
-		const rowHeight = this.rowHeight
-		const itemWidth = this.itemWidth
-		const imageRadius = Math.max(this.radius - inset, 0)
-		const plateColor = backpack || cooldown > 0 ? MenuSDK.HudColors.kill : BLACK
+		const scale = this.enter(motion)
+		const width = this.itemWidth * scale
+		const height = this.rowHeight * scale
+		const left = x + (this.itemWidth - width) / 2
+		const top = y + (this.rowHeight - height) / 2
+		const inset = Math.max(this.inset * scale, 1)
+		const radius = this.radius * scale
+		const imageRadius = Math.max(radius - inset, 0)
+		// only a backpack slot is called out in red; an item on cooldown keeps the plain plate
+		const plateColor = backpack ? MenuSDK.HudColors.kill : BLACK
 		MenuSDK.HudCard.Plate(
-			x,
-			y,
-			itemWidth,
-			rowHeight,
-			this.radius,
+			left,
+			top,
+			width,
+			height,
+			radius,
 			plateColor,
 			MenuSDK.hudAlpha(backpack ? 120 : 180)
 		)
-		this.imagePos.SetVector(x + inset, y + inset)
-		this.imageSize.SetVector(itemWidth - inset * 2, rowHeight - inset * 2)
+		this.imagePos.SetVector(left + inset, top + inset)
+		this.imageSize.SetVector(width - inset * 2, height - inset * 2)
 		MenuSDK.HudCard.Image(
 			texture,
 			this.imagePos,
 			this.imageSize,
 			Color.WhiteReadonly,
 			MenuSDK.hudAlpha(backpack ? 140 : 255),
-			imageRadius
+			imageRadius,
+			0,
+			"cover"
 		)
 		if (cooldown > 0 && menu.Cooldown.value) {
 			MenuSDK.HudCard.Plate(
-				x + inset,
-				y + inset,
-				itemWidth - inset * 2,
-				rowHeight - inset * 2,
+				left + inset,
+				top + inset,
+				width - inset * 2,
+				height - inset * 2,
 				imageRadius,
 				BLACK,
 				MenuSDK.hudAlpha(120)
 			)
 			MenuSDK.HudText.Center(
-				x,
-				y + rowHeight / 2,
-				itemWidth,
+				left,
+				top + height / 2,
+				width,
 				menu.FormatTime.value && cooldown >= 60
 					? Math.formatTime(cooldown)
 					: cooldown.toFixed(),
-				COOLDOWN_FONT,
+				COOLDOWN_FONT * scale,
 				Color.WhiteReadonly,
 				MenuSDK.HudBold
 			)
 		}
 		if (charges > 0 && menu.Charge.value) {
 			MenuSDK.HudText.Right(
-				x + itemWidth - inset * 2,
-				y + rowHeight - MenuSDK.hudH(7),
+				left + width - inset * 2,
+				top + height - MenuSDK.hudH(7) * scale,
 				charges.toFixed(),
-				CHARGES_FONT,
+				CHARGES_FONT * scale,
 				Color.WhiteReadonly,
 				MenuSDK.HudBold
 			)
 		}
-		return x + itemWidth + this.itemGap
+		this.ping(left, top, width, height, scale, motion.flash)
+		this.leave()
 	}
 }
