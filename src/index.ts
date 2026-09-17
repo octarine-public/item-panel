@@ -52,7 +52,10 @@ new (class CItemPanel {
 	private get canDrawLive() {
 		return this.isInGameUI && !this.isPostGame && !this.isToggleKeyMode
 	}
-	private get isTouchMode() {
+	private get canDrag() {
+		if (MenuSDK.MenuManager.IsOpen) {
+			return true
+		}
 		const touchKey = this.menu.TouchKeyPanel
 		return touchKey.isPressed || touchKey.assignedKey <= 0
 	}
@@ -123,7 +126,7 @@ new (class CItemPanel {
 		if (!this.shouldInput(key)) {
 			return true
 		}
-		if (key === VMouseKeys.MK_LBUTTON && !this.isTouchMode) {
+		if (key === VMouseKeys.MK_LBUTTON && !this.canDrag) {
 			return true
 		}
 		return this.gui.MouseKeyDown(key)
