@@ -1,4 +1,5 @@
 import { HiddenItems } from "./hidden"
+import { PanelIcons } from "./icons"
 
 export class MenuManager {
 	public IsToggled = true
@@ -8,6 +9,7 @@ export class MenuManager {
 	public readonly BackPack: Menu.Toggle
 	public readonly Cooldown: Menu.Toggle
 	public readonly FormatTime: Menu.Toggle
+	public readonly Animation: Menu.Toggle
 
 	public readonly ModeKey: Menu.Dropdown
 	public readonly ToggleKey: Menu.KeyBind
@@ -20,65 +22,76 @@ export class MenuManager {
 	private readonly entries = Menu.AddEntry("Visual")
 
 	constructor() {
-		this.Tree = this.entries.AddNode("Item Panel", ImageData.Icons.icon_svg_hamburger)
+		this.Tree = this.entries.AddNode("Item Panel", PanelIcons.ItemPanel)
 		this.Tree.SortNodes = false
 
-		this.State = this.Tree.AddToggle("State", true)
+		// the script's own switch rides the top bar beside the breadcrumb and gates the page
+		this.State = this.Tree.AddToggle("State", true, undefined, -1, PanelIcons.State)
+		this.Tree.HeaderControl = this.State
+		this.Tree.Gate = this.State
 		this.Ally = this.Tree.AddToggle(
 			"Allies",
 			false,
 			"Show allies",
 			-1,
-			ImageData.GetRankTexture(LaneSelection.HARD_SUPPORT)
+			PanelIcons.Allies
 		)
-
 		this.BackPack = this.Tree.AddToggle(
 			"Backpack",
 			false,
 			"Show backpack",
 			-1,
-			ImageData.Icons.icon_brackets
+			PanelIcons.Backpack
 		)
-
 		this.Charge = this.Tree.AddToggle(
 			"ItemPanel_Charge_State",
 			true,
 			undefined,
 			-1,
-			ImageData.Icons.icon_svg_charges
+			PanelIcons.Charges
 		)
 		this.Cooldown = this.Tree.AddToggle(
 			"ItemPanel_Cooldwn_State",
 			true,
 			undefined,
 			-1,
-			ImageData.Icons.icon_svg_duration
+			PanelIcons.Cooldown
 		)
-
 		this.FormatTime = this.Tree.AddToggle(
 			"Cooldown format time",
 			false,
 			"Show cooldown format time (min:sec)",
 			-1,
-			ImageData.Icons.icon_svg_format_time
+			PanelIcons.FormatTime
+		)
+
+		this.Animation = this.Tree.AddToggle(
+			"Animation",
+			true,
+			"Bring a new item onto the panel instead of\nswitching it on: the cell grows into its\nslot and is rung in, and its neighbours glide",
+			-1,
+			PanelIcons.Animation
 		)
 
 		this.HiddenItems = new HiddenItems(this.Tree)
 
-		const treeBinds = this.Tree.AddNode("Binds", ImageData.Icons.icon_svg_keyboard)
+		const treeBinds = this.Tree.AddNode("Binds", PanelIcons.Binds)
 		treeBinds.SortNodes = false
 		this.ToggleKey = treeBinds.AddKeybind("Key", "None", "Key turn on/off panel")
+		this.ToggleKey.IconPath = PanelIcons.Key
 		this.TouchKeyPanel = treeBinds.AddKeybind(
 			"Touch panel",
 			"Ctrl",
 			"The button captures the panel\nfor dragging on the screen.\nIf the button is not set, the panel can only\nbe dragged using the mouse"
 		)
+		this.TouchKeyPanel.IconPath = PanelIcons.TouchPanel
 		this.ModeKey = treeBinds.AddDropdown(
 			"Key mode",
 			["Hold key", "Toggled"],
 			1,
 			"Key mode turn on/off panel"
 		)
+		this.ModeKey.IconPath = PanelIcons.KeyMode
 
 		this.Overlay = new MenuSDK.OverlayMenu(this.Tree, 0, 547)
 

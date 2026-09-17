@@ -30,8 +30,18 @@
 	"Hide by item cost": "Скрыть предметы с ценой меньше",
 	"Neutral items": "Нейтральные предметы",
 	"Hide passive items that\nhave no cooldown": "Скрыть пассивные предметы\nбез перезарядки",
-	"Select items\nfor hide on panel": "Выберите предметы\nдля скрытия на панели",
-	"Hide all common items" : "Скрыть все общие предметы",
-	"Hide all rare items" : "Скрыть все редкие предметы",
-	"Hide all neutral items" : "Скрыть все нейтральные предметы"
+	"The items hidden on the panel.\nPress + to open the list and choose them": "Предметы, скрытые на панели.\nНажмите +, чтобы открыть список и выбрать их",
+	"Hide all common items": "Скрыть все общие предметы",
+	"Hide all rare items": "Скрыть все редкие предметы",
+	"Hide all neutral items": "Скрыть все нейтральные предметы",
+	"Common": "Обычные",
+	"Consumable": "Расходуемые",
+	"Component": "Компоненты",
+	"Secret shop": "Тайная лавка",
+	"Rare": "Редкие",
+	"Epic": "Эпические",
+	"Artifact": "Артефакты",
+	"Neutral": "Нейтральные",
+	"Animation": "Анимация",
+	"Bring a new item onto the panel instead of\nswitching it on: the cell grows into its\nslot and is rung in, and its neighbours glide": "Новый предмет появляется на панели плавно,\nа не мгновенно: ячейка вырастает в своём слоте\nс подсветкой, а соседние плавно сдвигаются"
 }

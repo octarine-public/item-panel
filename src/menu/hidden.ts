@@ -1,3 +1,81 @@
+import { PanelIcons } from "./icons"
+
+type ConfigObject = MenuSDK.ConfigObject
+
+/**
+ * One heading of a picker's popup: the qualities the shop files under it, and the colour the
+ * heading wears there. The first heading of a list also takes whatever quality none of them names,
+ * so an item the game grows after this was written still stands somewhere rather than nowhere.
+ */
+interface IItemSection {
+	readonly title: string
+	readonly accent: string
+	readonly qualities: readonly Nullable<string>[]
+}
+
+/** The cheap side of the shop: an item the data gives no quality of its own is one of the common. */
+const CommonSections: readonly IItemSection[] = [
+	{ title: "Common", accent: "#b0b6c0", qualities: ["common", undefined] },
+	{ title: "Consumable", accent: "#5f9e5e", qualities: ["consumable"] },
+	{ title: "Component", accent: "#6a8fc0", qualities: ["component"] },
+	{ title: "Secret shop", accent: "#b06fc8", qualities: ["secret_shop"] }
+]
+
+/** The expensive side, in the order the shop ranks it. */
+const RareSections: readonly IItemSection[] = [
+	{ title: "Rare", accent: "#4a90d9", qualities: ["rare"] },
+	{ title: "Epic", accent: "#9b6fc8", qualities: ["epic"] },
+	{ title: "Artifact", accent: "#e0a44b", qualities: ["artifact"] }
+]
+
+/** What the jungle drops, under one heading: the data carries no tier to split it by. */
+const NeutralSections: readonly IItemSection[] = [
+	{ title: "Neutral", accent: "#c47b3f", qualities: [] }
+]
+
+/** The rows whose picks a config wrote under a page of their own, before the popup replaced it. */
+const PickerRows = ["Rare items", "Common items", "Neutral items"]
+
+/** The heading a quality stands under: the one naming it, else the first, which takes the rest. */
+function sectionOf(
+	sections: readonly IItemSection[],
+	quality: Nullable<string>
+): IItemSection {
+	return sections.find(section => section.qualities.includes(quality)) ?? sections[0]
+}
+
+/** What a tile is called in the popup: the item's name, without the prefix the data files it under. */
+function displayName(name: string): string {
+	return name
+		.slice("item_".length)
+		.split("_")
+		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(" ")
+}
+
+/** The rows a config keeps under a page, or nothing when the value is not a page at all. */
+function objectOf(value: unknown): Nullable<ConfigObject> {
+	return typeof value === "object" && value !== null && !Array.isArray(value)
+		? (value as ConfigObject)
+		: undefined
+}
+
+/**
+ * Carries the picks saved while every group had a page of its own onto the row that replaced it:
+ * the page and the only row it held share a name, so what stood under both is the row's own now.
+ * Idempotent, as a migration must be — a config already holding the row's value passes through.
+ */
+function migratePickers(stored: Nullable<ConfigObject>): void {
+	if (stored === undefined) {
+		return
+	}
+	for (const name of PickerRows) {
+		const saved = objectOf(stored[name])?.[name]
+		if (saved !== undefined) {
+			stored[name] = saved
+		}
+	}
+}
 
 export class HiddenItems {
 	public readonly Cost: Menu.Slider
@@ -11,46 +89,21 @@ export class HiddenItems {
 	public readonly HideAllNeutral: Menu.Toggle
 
 	constructor(menu: Menu.Node) {
-		const tree = menu.AddNode(
-			"Hide items",
-			ImageData.Icons.icon_close_cross_eye_hidden
-		)
+		const tree = menu.AddNode("Hide items", PanelIcons.HideItems)
 		tree.SortNodes = false
+		// every group stood on a page of its own before its row grew a popup of items
+		MenuSDK.AddConfigMigration(raw =>
+			migratePickers(MenuSDK.ConfigSubtreeOf(raw, tree.entry))
+		)
+		migratePickers(tree.entry.stored)
+
 		this.Passive = tree.AddToggle(
 			"Passive items",
 			false,
 			"Hide passive items that\nhave no cooldown",
 			-1,
-			ImageData.GetItemTexture("item_branches"),
-			0
+			PanelIcons.Passive
 		)
-
-		this.HideAllCommon = tree.AddToggle(
-			"Hide all common items",
-			false,
-			"Hide all common items",
-			-1,
-			ImageData.GetItemTexture("item_blink"),
-			0
-		)
-
-		this.HideAllRare = tree.AddToggle(
-			"Hide all rare items",
-			false,
-			"Hide all rare items",
-			-1,
-			ImageData.GetItemTexture("item_rapier"),
-			0
-		)
-
-		this.HideAllNeutral = tree.AddToggle(
-			"Hide all neutral items",
-			false,
-			"Hide all neutral items",
-			-1,
-			ImageData.GetItemTexture("item_spy_gadget")
-		)
-
 		this.Cost = tree.AddSlider(
 			"Hide by item cost",
 			0,
@@ -59,90 +112,52 @@ export class HiddenItems {
 			0,
 			"Hide an item if its cost is less"
 		)
+		this.Cost.IconPath = PanelIcons.Cost
 
-		const rareTree = tree.AddNode(
-			"Rare items",
-			ImageData.GetItemTexture("item_rapier"),
-			undefined,
-			0
+		this.HideAllCommon = tree.AddToggle(
+			"Hide all common items",
+			false,
+			"Hide all common items",
+			-1,
+			PanelIcons.Common
 		)
-		rareTree.IsHidden = true
+		this.CommonItems = this.addPicker(tree, "Common items", PanelIcons.Common)
 
-		this.RareItems = rareTree.AddImageSelector(
-			"Rare items",
-			[],
-			new Map(),
-			"Select items for hide on panel"
+		this.HideAllRare = tree.AddToggle(
+			"Hide all rare items",
+			false,
+			"Hide all rare items",
+			-1,
+			PanelIcons.Rare
 		)
+		this.RareItems = this.addPicker(tree, "Rare items", PanelIcons.Rare)
 
-		const commonTree = tree.AddNode(
-			"Common items",
-			ImageData.GetItemTexture("item_blink"),
-			undefined,
-			0
+		this.HideAllNeutral = tree.AddToggle(
+			"Hide all neutral items",
+			false,
+			"Hide all neutral items",
+			-1,
+			PanelIcons.Neutral
 		)
-		commonTree.IsHidden = true
+		this.NeutralItems = this.addPicker(tree, "Neutral items", PanelIcons.Neutral)
 
-		this.CommonItems = commonTree.AddImageSelector(
-			"Common items",
-			[],
-			new Map(),
-			"Select items for hide on panel"
-		)
-
-		const neutralTree = tree.AddNode(
-			"Neutral items",
-			ImageData.GetItemTexture("item_spy_gadget"),
-			undefined,
-			0
-		)
-		neutralTree.IsHidden = true
-
-		this.NeutralItems = neutralTree.AddImageSelector(
-			"Neutral items",
-			[],
-			new Map(),
-			"Select items for hide on panel"
-		)
-
-		this.HideAllRare.OnValue(call => {
-			rareTree.IsHidden = call.value
-			rareTree.Update()
-			tree.Update()
-		})
-		this.HideAllCommon.OnValue(call => {
-			commonTree.IsHidden = call.value
-			commonTree.Update()
-			tree.Update()
-		})
-		this.HideAllNeutral.OnValue(call => {
-			neutralTree.IsHidden = call.value
-			neutralTree.Update()
-			tree.Update()
-		})
+		this.gate(this.HideAllCommon, this.CommonItems)
+		this.gate(this.HideAllRare, this.RareItems)
+		this.gate(this.HideAllNeutral, this.NeutralItems)
 	}
 
 	public UnitAbilityDataUpdated() {
-		this.CommonItems.values = this.getItemData(
-			x =>
-				x.Purchasable &&
-				!x.ItemIsNeutralDrop &&
-				!x.ItemIsNeutralActiveDrop &&
-				this.isCommonItem(x)
+		this.fill(
+			this.CommonItems,
+			CommonSections,
+			data => this.isShopItem(data) && this.isCommonItem(data)
 		)
-		this.CommonItems.Update()
-		this.RareItems.values = this.getItemData(
-			x =>
-				x.Purchasable &&
-				!x.ItemIsNeutralDrop &&
-				!x.ItemIsNeutralActiveDrop &&
-				this.isRareItem(x)
+		this.fill(
+			this.RareItems,
+			RareSections,
+			data => this.isShopItem(data) && this.isRareItem(data)
 		)
-		this.RareItems.Update()
-		this.NeutralItems.values = this.getItemData(
-			x => x.ItemIsNeutralDrop || x.ItemIsNeutralActiveDrop
-		)
-		this.NeutralItems.Update()
+		this.fill(this.NeutralItems, NeutralSections, data => this.isNeutralItem(data))
 	}
 
 	public IsEnabled(name: string, abilityData: AbilityData) {
@@ -152,10 +167,7 @@ export class HiddenItems {
 		if (this.HideAllRare.value && this.isRareItem(abilityData)) {
 			return true
 		}
-		if (
-			this.HideAllNeutral.value &&
-			(abilityData.ItemIsNeutralDrop || abilityData.ItemIsNeutralActiveDrop)
-		) {
+		if (this.HideAllNeutral.value && this.isNeutralItem(abilityData)) {
 			return true
 		}
 		return (
@@ -164,14 +176,91 @@ export class HiddenItems {
 			this.NeutralItems.IsEnabled(name)
 		)
 	}
-	protected getItemData(call: (data: AbilityData, name: string) => boolean) {
+
+	/**
+	 * One group's row: the items chosen out of it stand in the row itself, and the button beside
+	 * them opens the popup the rest are chosen in — which is what keeps a whole shop one row tall.
+	 */
+	protected addPicker(tree: Menu.Node, name: string, iconPath: string) {
+		const picker = tree.AddImageSelector(
+			name,
+			[],
+			new Map(),
+			"The items hidden on the panel.\nPress + to open the list and choose them"
+		)
+		picker.IconPath = iconPath
+		picker.Variant = "item"
+		return picker
+	}
+
+	/** Takes a group's picker off the page while the whole group is hidden anyway. */
+	protected gate(hideAll: Menu.Toggle, picker: Menu.ImageSelector) {
+		const sync = () => {
+			picker.IsHidden = hideAll.value
+		}
+		hideAll.OnValue(sync)
+		sync()
+	}
+
+	/**
+	 * Hands one picker the items it chooses from. The item data arrives with the server rather than
+	 * with the menu, and comes again on every connection, so the catalogue is built from it each
+	 * time; nothing at all is data that never arrived, and what the picker carries is worth more.
+	 */
+	protected fill(
+		picker: Menu.ImageSelector,
+		sections: readonly IItemSection[],
+		holds: (data: AbilityData) => boolean
+	) {
+		const catalogue = this.catalogueOf(sections, holds)
+		if (catalogue.length !== 0) {
+			picker.Catalogue = catalogue
+		}
+	}
+
+	/**
+	 * The sections one picker's popup lists: every item the group holds, cheapest first, standing
+	 * under the heading its quality belongs to. A heading nothing landed under is left out.
+	 */
+	protected catalogueOf(
+		sections: readonly IItemSection[],
+		holds: (data: AbilityData) => boolean
+	) {
+		const values = new Map<IItemSection, MenuSDK.CatalogueValue[]>()
+		for (const [name, data] of this.itemsOf(holds)) {
+			const section = sectionOf(sections, data.ItemQuality)
+			let held = values.get(section)
+			if (held === undefined) {
+				held = []
+				values.set(section, held)
+			}
+			held.push({ value: name, label: displayName(name) })
+		}
+		return sections
+			.filter(section => values.has(section))
+			.map(section => ({
+				title: section.title,
+				accent: section.accent,
+				values: values.get(section) ?? []
+			}))
+	}
+
+	/** Every item the game knows that a group gathers, cheapest first. */
+	protected itemsOf(holds: (data: AbilityData) => boolean) {
 		return Array.from(AbilityData.globalStorage.entries())
 			.filter(
 				([name, data]) =>
-					data.IsItem && !name.startsWith("item_recipe_") && call(data, name)
+					data.IsItem && !name.startsWith("item_recipe_") && holds(data)
 			)
-			.orderBy(([, x]) => x.Cost)
-			.map(([name, _]) => name)
+			.orderBy(([, data]) => data.Cost)
+	}
+
+	/** Whether the shop sells this, as opposed to the jungle dropping it. */
+	private isShopItem(abilityData: AbilityData) {
+		return abilityData.Purchasable && !this.isNeutralItem(abilityData)
+	}
+	private isNeutralItem(abilityData: AbilityData) {
+		return abilityData.ItemIsNeutralDrop || abilityData.ItemIsNeutralActiveDrop
 	}
 	private isRareItem(abilityData: AbilityData) {
 		return (

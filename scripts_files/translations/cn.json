@@ -5,5 +5,16 @@
 	"ItemPanel_EmptySlot": "顯示空槽",
 	"ItemPanel_Charge_State": "顯示費用",
 	"ItemPanel_Cooldwn_State": "顯示冷卻時間",
-	"ItemPanel_PingClick2": "點擊時 Ping"
+	"ItemPanel_PingClick2": "點擊時 Ping",
+	"The items hidden on the panel.\nPress + to open the list and choose them": "在面板上隱藏的物品。\n按 + 開啟列表並選擇",
+	"Common": "普通",
+	"Consumable": "消耗品",
+	"Component": "配件",
+	"Secret shop": "神秘商店",
+	"Rare": "稀有",
+	"Epic": "史詩",
+	"Artifact": "神器",
+	"Neutral": "中立",
+	"Animation": "動畫",
+	"Bring a new item onto the panel instead of\nswitching it on: the cell grows into its\nslot and is rung in, and its neighbours glide": "新物品平滑地出現在面板上，而不是瞬間切換：\n格子在自己的欄位中放大並亮起，\n相鄰的格子隨之滑動"
 }
