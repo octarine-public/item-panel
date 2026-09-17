@@ -12,6 +12,8 @@ declare namespace MenuSDK {
 		/** Set when the row wraps its icon in a fixed box, so the hint lays it out the same. */
 		readonly iconBoxed?: boolean
 		readonly iconSizeDp?: number
+		/** Width-to-height ratio of the leading icon; omitted keeps the square default. */
+		readonly iconAspectRatio?: number
 		readonly iconTint?: boolean
 		readonly iconRound?: number
 		readonly dotColor?: StyleColor

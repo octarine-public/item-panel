@@ -29,6 +29,8 @@ declare namespace MenuSDK {
 		readonly weight?: number
 		readonly italic?: boolean
 		readonly outline?: boolean
+		readonly effect?: EHudTextEffect
+		readonly effectOpacity?: number
 		readonly flags?: TextFlags
 		readonly division?: number
 	}
