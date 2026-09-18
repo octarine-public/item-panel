@@ -1,5 +1,6 @@
 import { HiddenItems } from "./hidden"
 import { PanelIcons } from "./icons"
+import { TextStyleMenu } from "./style"
 
 export class MenuManager {
 	public IsToggled = true
@@ -15,6 +16,7 @@ export class MenuManager {
 	public readonly ToggleKey: Menu.KeyBind
 	public readonly TouchKeyPanel: Menu.KeyBind
 	public readonly HiddenItems: HiddenItems
+	public readonly Style: TextStyleMenu
 
 	public readonly Overlay: MenuSDK.OverlayMenu
 	public readonly Tree: Menu.Node
@@ -68,12 +70,13 @@ export class MenuManager {
 		this.Animation = this.Tree.AddToggle(
 			"Animation",
 			true,
-			"Bring a new item onto the panel instead of\nswitching it on: the cell grows into its\nslot and is rung in, and its neighbours glide",
+			"Bring a new item onto the panel instead of\nswitching it on: the cell fades into its\nslot and is rung in, and its neighbours glide",
 			-1,
 			PanelIcons.Animation
 		)
 
 		this.HiddenItems = new HiddenItems(this.Tree)
+		this.Style = new TextStyleMenu(this.Tree)
 
 		const treeBinds = this.Tree.AddNode("Binds", PanelIcons.Binds)
 		treeBinds.SortNodes = false

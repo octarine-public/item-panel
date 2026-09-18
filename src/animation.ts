@@ -17,16 +17,6 @@ export function easeOut(value: number): number {
 	return 1 - rest * rest * rest
 }
 
-/**
- * `t` eased out past its end and back, so a cell settles into its slot with a little weight behind
- * it. The overshoot is what reads as something arriving rather than something switched on.
- */
-export function easeOutBack(value: number): number {
-	const over = 2.4
-	const rest = value - 1
-	return 1 + (over + 1) * rest * rest * rest + over * rest * rest
-}
-
 /** Where a cell stands this frame, and how far into its entrance it is. */
 export interface ISlotMotion {
 	/**

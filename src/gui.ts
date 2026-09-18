@@ -1,4 +1,4 @@
-import { easeOut, easeOutBack, ISlotMotion, SlotMotion } from "./animation"
+import { easeOut, ISlotMotion, SlotMotion } from "./animation"
 import { MenuManager } from "./menu"
 import { IsBackpackSlot, UnitData } from "./unit"
 
@@ -10,15 +10,9 @@ const ITEM_GAP = 2
 const INSET = 1
 const STRIP_WIDTH = 2
 const RADIUS = 5
-const COOLDOWN_FONT = 11
-const CHARGES_FONT = 10
+const COOLDOWN_FONT = 12.1
+const CHARGES_FONT = 11
 
-/** What a cell is scaled to as its entrance starts: it grows into its slot, it does not blink on. */
-const POP_FROM = 0.7
-/** The share of the entrance spent fading in, so a cell is solid well before it stops moving. */
-const POP_FADE = 0.55
-/** How far past a cell's edge its ring has been thrown by the time it is gone, in dp. */
-const PING_SPREAD = 4
 /** The accent wash over the face of a cell that has just landed, at its brightest. */
 const PING_TINT = 90
 /** The accent the ring itself is struck in. */
@@ -121,6 +115,21 @@ function previewCount(row: IPreviewRow, backPack: boolean): number {
 		}
 	}
 	return count
+}
+
+/**
+ * `size` brought down until `text` set at it fits `boxWidth`: a reading scaled up on the style
+ * page stays inside its cell rather than spilling over the edge onto the next one.
+ */
+function fitSize(
+	text: string,
+	size: number,
+	boxWidth: number,
+	weight: number,
+	family: Nullable<string>
+): number {
+	const width = MenuSDK.HudText.Width(text, size, weight, family)
+	return width > boxWidth ? Math.max((size * boxWidth) / width, 1) : size
 }
 
 /** Whether a preview row's last cell is away this instant, on the stage's own cycle. */
@@ -295,21 +304,16 @@ export class GUIHelper {
 	}
 
 	/**
-	 * Fades everything a cell is about to draw by how far into its entrance it is, and answers how
-	 * far its box is shrunk for it. The fade goes on the surface rather than into every call, so
-	 * the readings on the cell - a cooldown, a charge count - come in with the plate under them and
-	 * nothing has to carry the entrance by hand.
+	 * Fades everything a cell is about to draw by how far into its entrance it is. The fade goes on
+	 * the surface rather than into every call, so the readings on the cell - a cooldown, a charge
+	 * count - come in with the plate under them and nothing has to carry the entrance by hand.
 	 */
-	private enter(motion: ISlotMotion): number {
+	private enter(motion: ISlotMotion): void {
 		const appear = motion.appear
 		this.outerAlpha = MenuSDK.HudAlphaScale()
-		if (appear >= 1) {
-			return 1
+		if (appear < 1) {
+			MenuSDK.SetHudAlphaScale(this.outerAlpha * easeOut(appear))
 		}
-		MenuSDK.SetHudAlphaScale(
-			this.outerAlpha * easeOut(Math.min(appear / POP_FADE, 1))
-		)
-		return POP_FROM + (1 - POP_FROM) * easeOutBack(appear)
 	}
 
 	/** Hands the panel's own fade back, so the next cell starts from it and not from this one's. */
@@ -319,29 +323,29 @@ export class GUIHelper {
 
 	/**
 	 * The ring a cell that has just landed wears: an accent wash over its face and a rim struck on
-	 * its edge, thrown clear of it and faded as the moment passes. This is what says a new item,
-	 * rather than a row that happens to be one cell wider than it was a second ago.
+	 * its edge, faded as the moment passes. This is what says a new item, rather than a row that
+	 * happens to be one cell wider than it was a second ago.
+	 *
+	 * Nothing about it moves. A rim thrown a few dp clear of the cell crawls the pixel grid one
+	 * step at a time on its way out - as did a cell scaled up into its slot - and a step every few
+	 * frames reads as a stutter, not as motion. Only its alpha changes, and that is smooth.
 	 */
 	private ping(
 		x: number,
 		y: number,
 		width: number,
 		height: number,
-		scale: number,
 		flash: number
 	): void {
 		if (flash <= 0) {
 			return
 		}
-		const spread = PING_SPREAD * easeOut(1 - flash)
-		const growX = MenuSDK.hudW(spread)
-		const growY = MenuSDK.hudH(spread)
 		MenuSDK.HudCard.Chip(
-			x - growX,
-			y - growY,
-			width + growX * 2,
-			height + growY * 2,
-			RADIUS * scale + spread,
+			x,
+			y,
+			width,
+			height,
+			RADIUS,
 			MenuSDK.HudColors.accent,
 			MenuSDK.hudAlpha(PING_TINT * flash * flash),
 			MenuSDK.hudAlpha(PING_EDGE * Math.min(flash * PING_HOLD, 1))
@@ -358,23 +362,13 @@ export class GUIHelper {
 		if (motion.appear <= 0) {
 			return
 		}
-		const scale = this.enter(motion)
-		const width = this.heroWidth * scale
-		const height = this.rowHeight * scale
-		const left = x + (this.heroWidth - width) / 2
-		const top = y + (this.rowHeight - height) / 2
-		const inset = Math.max(this.inset * scale, 1)
-		const radius = this.radius * scale
-		MenuSDK.HudCard.Plate(
-			left,
-			top,
-			width,
-			height,
-			radius,
-			BLACK,
-			MenuSDK.hudAlpha(180)
-		)
-		this.imagePos.SetVector(left + inset, top + inset)
+		this.enter(motion)
+		const width = this.heroWidth
+		const height = this.rowHeight
+		const inset = this.inset
+		const radius = this.radius
+		MenuSDK.HudCard.Plate(x, y, width, height, radius, BLACK, MenuSDK.hudAlpha(180))
+		this.imagePos.SetVector(x + inset, y + inset)
 		this.imageSize.SetVector(width - inset * 2, height - inset * 2)
 		MenuSDK.HudCard.Image(
 			texture,
@@ -387,9 +381,9 @@ export class GUIHelper {
 			"cover"
 		)
 		MenuSDK.HudCard.Fill(
-			left + inset,
-			top + inset,
-			Math.max(this.stripWidth * scale, 1),
+			x + inset,
+			y + inset,
+			this.stripWidth,
 			height - inset * 2,
 			MenuSDK.HudColors.readable(color),
 			MenuSDK.hudAlpha()
@@ -410,26 +404,24 @@ export class GUIHelper {
 			return
 		}
 		const menu = this.menu
-		const scale = this.enter(motion)
-		const width = this.itemWidth * scale
-		const height = this.rowHeight * scale
-		const left = x + (this.itemWidth - width) / 2
-		const top = y + (this.rowHeight - height) / 2
-		const inset = Math.max(this.inset * scale, 1)
-		const radius = this.radius * scale
+		this.enter(motion)
+		const width = this.itemWidth
+		const height = this.rowHeight
+		const inset = this.inset
+		const radius = this.radius
 		const imageRadius = Math.max(radius - inset, 0)
 		// only a backpack slot is called out in red; an item on cooldown keeps the plain plate
 		const plateColor = backpack ? MenuSDK.HudColors.kill : BLACK
 		MenuSDK.HudCard.Plate(
-			left,
-			top,
+			x,
+			y,
 			width,
 			height,
 			radius,
 			plateColor,
 			MenuSDK.hudAlpha(backpack ? 120 : 180)
 		)
-		this.imagePos.SetVector(left + inset, top + inset)
+		this.imagePos.SetVector(x + inset, y + inset)
 		this.imageSize.SetVector(width - inset * 2, height - inset * 2)
 		MenuSDK.HudCard.Image(
 			texture,
@@ -441,39 +433,56 @@ export class GUIHelper {
 			0,
 			"cover"
 		)
+		const style = menu.Style
+		const family = style.FontFamily
+		const weight = style.FontWeight
+		const inner = width - inset * 2
 		if (cooldown > 0 && menu.Cooldown.value) {
 			MenuSDK.HudCard.Plate(
-				left + inset,
-				top + inset,
-				width - inset * 2,
+				x + inset,
+				y + inset,
+				inner,
 				height - inset * 2,
 				imageRadius,
 				BLACK,
 				MenuSDK.hudAlpha(120)
 			)
-			MenuSDK.HudText.Center(
-				left,
-				top + height / 2,
-				width,
+			const text =
 				menu.FormatTime.value && cooldown >= 60
 					? Math.formatTime(cooldown)
-					: cooldown.toFixed(),
-				COOLDOWN_FONT * scale,
-				Color.WhiteReadonly,
-				MenuSDK.HudBold
+					: cooldown.toFixed()
+			MenuSDK.HudText.Center(
+				x,
+				y + height / 2,
+				width,
+				text,
+				fitSize(text, COOLDOWN_FONT * style.Scale, inner, weight, family),
+				style.Color.SelectedColor,
+				weight,
+				style.EffectKind,
+				family,
+				style.Shade
 			)
 		}
 		if (charges > 0 && menu.Charge.value) {
+			const text = charges.toFixed()
+			const size = fitSize(text, CHARGES_FONT * style.Scale, inner, weight, family)
+			// the count stands on the cell's bottom edge whatever size it is set at, rather than
+			// at a fixed lift a taller line would carry off the plate
+			const line = MenuSDK.HudText.Height(text, size, weight, family)
 			MenuSDK.HudText.Right(
-				left + width - inset * 2,
-				top + height - MenuSDK.hudH(7) * scale,
-				charges.toFixed(),
-				CHARGES_FONT * scale,
-				Color.WhiteReadonly,
-				MenuSDK.HudBold
+				x + inner,
+				y + height - inset - line / 2,
+				text,
+				size,
+				style.Color.SelectedColor,
+				weight,
+				style.EffectKind,
+				family,
+				style.Shade
 			)
 		}
-		this.ping(left, top, width, height, scale, motion.flash)
+		this.ping(x, y, width, height, motion.flash)
 		this.leave()
 	}
 }
