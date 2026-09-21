@@ -28,10 +28,16 @@ const RareSections: readonly IItemSection[] = [
 	{ title: "Artifact", accent: "#e0a44b", qualities: ["artifact"] }
 ]
 
-/** What the jungle drops, under one heading: the data carries no tier to split it by. */
+/** What the jungle drops when its tiers cannot be read: one heading, the data carries no tier. */
 const NeutralSections: readonly IItemSection[] = [
 	{ title: "Neutral", accent: "#c47b3f", qualities: [] }
 ]
+
+/** Where the game files the jungle's drop pool, tier by tier. */
+const NeutralTiersPath = "scripts/npc/neutral_items.txt"
+
+/** The colour a tier's heading wears, lowest tier first; a tier past the last wears its colour. */
+const TierAccents = ["#b0b6c0", "#5f9e5e", "#4a90d9", "#9b6fc8", "#e0a44b"]
 
 /** The rows whose picks a config wrote under a page of their own, before the popup replaced it. */
 const PickerRows = ["Rare items", "Common items", "Neutral items"]
@@ -58,6 +64,31 @@ function objectOf(value: unknown): Nullable<ConfigObject> {
 	return typeof value === "object" && value !== null && !Array.isArray(value)
 		? (value as ConfigObject)
 		: undefined
+}
+
+/** The KV block under a key, or nothing when what stands there is not a block. */
+function blockOf(value: Nullable<RecursiveMapValue>): Nullable<RecursiveMap> {
+	return value instanceof Map ? value : undefined
+}
+
+/**
+ * The tiers of the jungle's drop pool as the game files them: each tier's number and the
+ * trinkets it holds, in the file's order. Nothing when the file is missing or laid out some
+ * other way, which is the caller's cue to fall back.
+ */
+function readNeutralTiers(): [tier: string, names: string[]][] {
+	if (!fexists(NeutralTiersPath)) {
+		return []
+	}
+	const pool = blockOf(parseKV(NeutralTiersPath).get("neutral_items"))
+	const tiers = blockOf(pool?.get("neutral_tiers"))
+	if (tiers === undefined) {
+		return []
+	}
+	return Array.from(tiers, ([tier, block]): [string, string[]] => [
+		tier,
+		Array.from(blockOf(blockOf(block)?.get("items"))?.keys() ?? [])
+	])
 }
 
 /**
@@ -157,7 +188,7 @@ export class HiddenItems {
 			RareSections,
 			data => this.isShopItem(data) && this.isRareItem(data)
 		)
-		this.fill(this.NeutralItems, NeutralSections, data => this.isNeutralItem(data))
+		this.fillNeutral()
 	}
 
 	public IsEnabled(name: string, abilityData: AbilityData) {
@@ -216,6 +247,34 @@ export class HiddenItems {
 		if (catalogue.length !== 0) {
 			picker.Catalogue = catalogue
 		}
+	}
+
+	/**
+	 * Hands the neutral picker the jungle's drop pool, a heading per tier in the order the game
+	 * files them, each holding that tier's trinkets in the game's own order. Only what the pool
+	 * holds today is listed, though the data still knows every trinket the jungle ever dropped;
+	 * all of those stand under one heading only when the pool cannot be read.
+	 */
+	protected fillNeutral() {
+		const catalogue = this.tierCatalogue()
+		if (catalogue.length !== 0) {
+			this.NeutralItems.Catalogue = catalogue
+			return
+		}
+		this.fill(this.NeutralItems, NeutralSections, data => this.isNeutralItem(data))
+	}
+
+	/** The drop pool a heading per tier; a tier holding nothing the game knows is left out. */
+	protected tierCatalogue(): MenuSDK.CatalogueSection[] {
+		return readNeutralTiers()
+			.map(([tier, names], index) => ({
+				title: `Tier ${tier}`,
+				accent: TierAccents[Math.min(index, TierAccents.length - 1)],
+				values: names
+					.filter(name => AbilityData.globalStorage.has(name))
+					.map(name => ({ value: name, label: displayName(name) }))
+			}))
+			.filter(section => section.values.length !== 0)
 	}
 
 	/**

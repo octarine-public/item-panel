@@ -56,5 +56,10 @@
 	"Shadow": "Тень",
 	"Outline": "Обводка",
 	"Text shade opacity": "Непрозрачность эффекта",
-	"How dark the shade under the glyphs is drawn": "Насколько тёмным рисуется\nэффект под текстом"
+	"How dark the shade under the glyphs is drawn": "Насколько тёмным рисуется\nэффект под текстом",
+	"Tier 1": "Разряд 1",
+	"Tier 2": "Разряд 2",
+	"Tier 3": "Разряд 3",
+	"Tier 4": "Разряд 4",
+	"Tier 5": "Разряд 5"
 }

@@ -467,12 +467,12 @@ export class GUIHelper {
 		if (charges > 0 && menu.Charge.value) {
 			const text = charges.toFixed()
 			const size = fitSize(text, CHARGES_FONT * style.Scale, inner, weight, family)
-			// the count stands on the cell's bottom edge whatever size it is set at, rather than
-			// at a fixed lift a taller line would carry off the plate
-			const line = MenuSDK.HudText.Height(text, size, weight, family)
+			// the count is tucked into the cell's bottom-right corner: its right edge on the
+			// artwork's, and the glyphs set in a box only as tall as the font, so the digits sit on
+			// the bottom edge rather than float above it on the line's own leading
 			MenuSDK.HudText.Right(
-				x + inner,
-				y + height - inset - line / 2,
+				x + width - inset,
+				y + height - inset - size / 2,
 				text,
 				size,
 				style.Color.SelectedColor,

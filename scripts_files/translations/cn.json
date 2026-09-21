@@ -56,5 +56,10 @@
 	"Shadow": "陰影",
 	"Outline": "描邊",
 	"Text shade opacity": "效果不透明度",
-	"How dark the shade under the glyphs is drawn": "文字下方效果的深淺程度"
+	"How dark the shade under the glyphs is drawn": "文字下方效果的深淺程度",
+	"Tier 1": "1級",
+	"Tier 2": "2級",
+	"Tier 3": "3級",
+	"Tier 4": "4級",
+	"Tier 5": "5級"
 }
