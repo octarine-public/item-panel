@@ -87,6 +87,8 @@ export class MenuManager {
 			"Ctrl",
 			"The button captures the panel\nfor dragging on the screen.\nIf the button is not set, the panel can only\nbe dragged using the mouse"
 		)
+		// ctrl is the game's own key too, so the press has to reach both
+		this.TouchKeyPanel.ClaimsKey = false
 		this.TouchKeyPanel.IconPath = PanelIcons.TouchPanel
 		this.ModeKey = treeBinds.AddDropdown(
 			"Key mode",
