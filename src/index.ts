@@ -15,7 +15,7 @@ new (class CItemPanel {
 		InputEventSDK.on("MouseKeyUp", this.MouseKeyUp.bind(this))
 		InputEventSDK.on("MouseKeyDown", this.MouseKeyDown.bind(this))
 
-		EventsSDK.on("Draw", this.Draw.bind(this))
+		EventsSDK.on("Draw2D", this.Draw.bind(this))
 		EventsSDK.on("GameEnded", this.GameEnded.bind(this))
 		EventsSDK.on("GameStarted", this.GameStarted.bind(this))
 		EventsSDK.on("EntityCreated", this.EntityCreated.bind(this))
