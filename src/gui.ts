@@ -28,6 +28,8 @@ const PREVIEW_AWAY = 0.28
 const PREVIEW_OFFSET = 0.5
 
 const BLACK = Color.Black
+/** How dark the plate over an item on cooldown is, 0-255: light enough to still tell the item by its art. */
+const COOLDOWN_SHADE = 80
 const DIRE_COLORS = Color.PlayerColorDire
 
 interface IPreviewItem {
@@ -445,7 +447,7 @@ export class GUIHelper {
 				height - inset * 2,
 				imageRadius,
 				BLACK,
-				MenuSDK.hudAlpha(120)
+				MenuSDK.hudAlpha(COOLDOWN_SHADE)
 			)
 			const text =
 				menu.FormatTime.value && cooldown >= 60

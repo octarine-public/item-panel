@@ -4,8 +4,12 @@ import { PanelIcons } from "./icons"
 const WEIGHTS = [400, 500, MenuSDK.HudBold, 700]
 const WEIGHT_NAMES = ["Regular", "Medium", "Semi-bold", "Bold"]
 
-/** Where the rows stand until a player moves them: the one place the panel's own look is set. */
-const DEFAULT_FONT = 0
+/**
+ * Where the rows stand until a player moves them: the one place the panel's own look is set.
+ * The face is the game's numeric one, which its own HUD sets cooldowns in - "Default" where the
+ * install gave none.
+ */
+const DEFAULT_FAMILY = "RadianceM"
 const DEFAULT_SIZE = 100
 const DEFAULT_WEIGHT = 2
 const DEFAULT_COLOR = Color.White
@@ -37,7 +41,11 @@ export class TextStyleMenu {
 		this.Node = node
 		node.SortNodes = false
 
-		this.Font = node.AddDropdown("Font", ["Default", ...this.families], DEFAULT_FONT)
+		this.Font = node.AddDropdown(
+			"Font",
+			["Default", ...this.families],
+			this.families.indexOf(DEFAULT_FAMILY) + 1
+		)
 		this.Font.IconPath = PanelIcons.Font
 		this.Size = node.AddSlider(
 			"Text size",
