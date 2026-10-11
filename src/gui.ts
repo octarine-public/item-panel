@@ -139,6 +139,32 @@ function previewAway(now: number, index: number): boolean {
 	return (now / PREVIEW_CYCLE + index * PREVIEW_OFFSET) % 1 < PREVIEW_AWAY
 }
 
+/** What a frame of the panel is built from, so a frame built from the same can be held instead. */
+class FrameStamp {
+	private readonly values: unknown[] = []
+	private index = 0
+	private same = true
+
+	public get Same() {
+		return this.same
+	}
+	public Begin() {
+		this.index = 0
+		this.same = true
+	}
+	public Put(value: unknown) {
+		if (this.values[this.index] !== value) {
+			this.values[this.index] = value
+			this.same = false
+		}
+		this.index++
+	}
+	/** Lets go of the last frame, so the next one is drawn whatever it is built from. */
+	public Forget() {
+		this.values.length = 0
+	}
+}
+
 export class GUIHelper {
 	private inset = 0
 	private radius = 0
@@ -157,6 +183,7 @@ export class GUIHelper {
 	private readonly motion = new SlotMotion()
 	private readonly previewMotion = new SlotMotion()
 	private readonly panel: MenuSDK.OverlayPanel
+	private readonly stamp = new FrameStamp()
 
 	private readonly drawContent = (origin: Vector2) => {
 		const motion = this.motion
@@ -245,6 +272,9 @@ export class GUIHelper {
 	public Draw(rows: UnitData[], maxItems: number): void {
 		this.rows = rows
 		this.measure(rows.length, maxItems)
+		if (this.restamp() && this.motion.Settled && this.panel.Hold(this.size)) {
+			return
+		}
 		this.panel.Draw(this.size, this.drawContent)
 	}
 
@@ -255,6 +285,7 @@ export class GUIHelper {
 			maxItems = Math.max(maxItems, previewCount(row, backPack))
 		}
 		this.measure(PREVIEW_ROWS.length, maxItems)
+		this.stamp.Forget()
 		this.panel.Draw(this.size, this.drawPreview)
 	}
 
@@ -269,7 +300,57 @@ export class GUIHelper {
 	public Reset(): void {
 		this.motion.Reset()
 		this.previewMotion.Reset()
+		this.stamp.Forget()
 		this.panel.Reset()
+	}
+
+	/**
+	 * Writes what this frame of the live rows is built from and answers whether the last frame was
+	 * built from the same.
+	 */
+	private restamp(): boolean {
+		const stamp = this.stamp,
+			menu = this.menu,
+			style = menu.Style,
+			theme = MenuSDK.Theme,
+			rows = this.rows
+		stamp.Begin()
+		stamp.Put(menu.Animation.value)
+		stamp.Put(menu.Cooldown.value)
+		stamp.Put(menu.Charge.value)
+		stamp.Put(menu.FormatTime.value)
+		stamp.Put(style.FontFamily)
+		stamp.Put(style.FontWeight)
+		stamp.Put(style.Scale)
+		stamp.Put(style.EffectKind)
+		stamp.Put(style.Shade)
+		stamp.Put(style.Color.SelectedColor.data32)
+		stamp.Put(this.size.x)
+		stamp.Put(this.size.y)
+		stamp.Put(this.panel.Scale)
+		stamp.Put(MenuSDK.DpToPx(1))
+		stamp.Put(theme.PaletteEpoch)
+		stamp.Put(theme.Glow)
+		stamp.Put(MenuSDK.FontEpoch())
+		stamp.Put(rows.length)
+		for (let index = 0; index < rows.length; index++) {
+			const data = rows[index],
+				unit = data.Owner,
+				items = data.visible
+			stamp.Put(data)
+			stamp.Put(unit.TexturePath())
+			stamp.Put(unit.Color.data32)
+			stamp.Put(items.length)
+			for (let slot = 0; slot < items.length; slot++) {
+				const item = items[slot]
+				stamp.Put(item)
+				stamp.Put(item.TexturePath)
+				stamp.Put(Math.round(item.Cooldown))
+				stamp.Put(item.CurrentCharges)
+				stamp.Put(IsBackpackSlot(item))
+			}
+		}
+		return stamp.Same
 	}
 
 	private measure(rowCount: number, maxItems: number): void {

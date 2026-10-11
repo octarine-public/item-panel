@@ -67,6 +67,7 @@ export class SlotMotion {
 	private next = 0
 	private standing = false
 	private enabled = true
+	private settled = true
 	private readonly states = new Map<object, ISlotState>()
 
 	/** Opens a frame on the draw clock, in seconds. */
@@ -76,6 +77,7 @@ export class SlotMotion {
 				this.Reset()
 			}
 			this.enabled = false
+			this.settled = true
 			return
 		}
 		// the preview runs on a clock that stands still while its motion is held, and drops back to
@@ -131,17 +133,29 @@ export class SlotMotion {
 		return state
 	}
 
+	/**
+	 * Whether every cell placed in the last frame stood in its column, fully in and with no ring
+	 * on it: a frame drawn again from the same cells would come out the same.
+	 */
+	public get Settled(): boolean {
+		return this.settled
+	}
+
 	/** Closes the frame: every cell the layout did not place this time is dropped. */
 	public End(): void {
 		if (!this.enabled) {
 			return
 		}
 		const states = this.states
+		let settled = true
 		for (const [key, state] of states) {
 			if (state.seen !== this.now) {
 				states.delete(key)
+			} else if (state.appear < 1 || state.flash > 0 || state.slot !== state.to) {
+				settled = false
 			}
 		}
+		this.settled = settled
 		// a panel that emptied - turned off by its key, its heroes gone - opens cold when it comes
 		// back, so a row returning whole does not arrive wearing a ring on every one of its cells
 		this.standing = states.size > 0
@@ -151,6 +165,7 @@ export class SlotMotion {
 	public Reset(): void {
 		this.states.clear()
 		this.standing = false
+		this.settled = true
 	}
 }
 
