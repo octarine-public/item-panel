@@ -188,7 +188,7 @@ export class GUIHelper {
 	private readonly drawContent = (origin: Vector2) => {
 		const motion = this.motion
 		const rows = this.rows
-		motion.Begin(MenuSDK.DrawClock(false), this.menu.Animation.value)
+		motion.Begin(MenuSDK.DrawClock(false), this.menu.Animates)
 		for (let index = 0; index < rows.length; index++) {
 			const data = rows[index]
 			const unit = data.Owner
@@ -228,7 +228,7 @@ export class GUIHelper {
 		// there to watch; a stage held still, like a panel with the motion off, keeps its row whole
 		// and stands its cells where they are: its clock has stopped, and an entrance timed against
 		// a clock that does not run would never end
-		const cycling = menu.Animation.value && MenuSDK.PreviewMotion.value
+		const cycling = menu.Animates && MenuSDK.PreviewMotion.value
 		motion.Begin(now, cycling)
 		for (let index = 0; index < PREVIEW_ROWS.length; index++) {
 			const row = PREVIEW_ROWS[index]
@@ -315,7 +315,7 @@ export class GUIHelper {
 			theme = MenuSDK.Theme,
 			rows = this.rows
 		stamp.Begin()
-		stamp.Put(menu.Animation.value)
+		stamp.Put(menu.Animates)
 		stamp.Put(menu.Cooldown.value)
 		stamp.Put(menu.Charge.value)
 		stamp.Put(menu.FormatTime.value)

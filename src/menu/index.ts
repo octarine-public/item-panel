@@ -11,6 +11,10 @@ export class MenuManager {
 	public readonly Cooldown: Menu.Toggle
 	public readonly FormatTime: Menu.Toggle
 	public readonly Animation: Menu.Toggle
+	/** Whether the panel moves: its own "Animation" row, and the menu's "Overlay animations". */
+	public get Animates(): boolean {
+		return this.Animation.value && MenuSDK.MotionEnabled(MenuSDK.EThemeScope.Panels)
+	}
 
 	public readonly ModeKey: Menu.Dropdown
 	public readonly ToggleKey: Menu.KeyBind
