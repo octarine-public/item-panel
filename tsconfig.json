@@ -1,12 +1,9 @@
 {
 	"compilerOptions": {
 		"target": "esnext",
-		"module": "ES2022",
-		"moduleResolution": "Node",
-		"rootDir": "../../../",
-		"baseUrl": "../../../",
+		"module": "esnext",
+		"moduleResolution": "bundler",
 		"noEmit": true,
-		"outDir": "scripts/",
 		"noUnusedLocals": true,
 		"strict": true,
 		"alwaysStrict": true,
@@ -14,11 +11,11 @@
 		"forceConsistentCasingInFileNames": true,
 		"lib": [
 			"ESNext"
-		],
+		]
 	},
 	"include": [
 		"./**/*.ts",
-		"../../**/*.d.ts"
+		"./**/*.tsx"
 	],
 	"exclude": [
 		"wrapper_autogen/**/*",

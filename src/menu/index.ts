@@ -1,11 +1,6 @@
-import {
-	ImageData,
-	LaneSelection,
-	Menu,
-	Vector2
-} from "github.com/octarine-public/wrapper/index"
-
 import { HiddenItems } from "./hidden"
+import { PanelIcons } from "./icons"
+import { TextStyleMenu } from "./style"
 
 export class MenuManager {
 	public IsToggled = true
@@ -15,96 +10,106 @@ export class MenuManager {
 	public readonly BackPack: Menu.Toggle
 	public readonly Cooldown: Menu.Toggle
 	public readonly FormatTime: Menu.Toggle
-	public readonly Opacity: Menu.Slider
+	public readonly Animation: Menu.Toggle
+	/** Whether the panel moves: its own "Animation" row, and the menu's "Overlay animations". */
+	public get Animates(): boolean {
+		return this.Animation.value && MenuSDK.MotionEnabled(MenuSDK.EThemeScope.Panels)
+	}
 
 	public readonly ModeKey: Menu.Dropdown
 	public readonly ToggleKey: Menu.KeyBind
 	public readonly TouchKeyPanel: Menu.KeyBind
 	public readonly HiddenItems: HiddenItems
+	public readonly Style: TextStyleMenu
 
-	public readonly Size: Menu.Slider
+	public readonly Overlay: MenuSDK.OverlayMenu
 	public readonly Tree: Menu.Node
-
-	public readonly Position: {
-		readonly X: Menu.Slider
-		readonly Y: Menu.Slider
-		Vector: Vector2
-	}
 
 	private readonly entries = Menu.AddEntry("Visual")
 
 	constructor() {
-		this.Tree = this.entries.AddNode("Item Panel", ImageData.Icons.icon_svg_hamburger)
+		this.Tree = this.entries.AddNode("Item Panel", PanelIcons.ItemPanel)
 		this.Tree.SortNodes = false
 
-		this.State = this.Tree.AddToggle("State", true)
+		// the script's own switch rides the top bar beside the breadcrumb and gates the page
+		this.State = this.Tree.AddToggle("State", true, undefined, -1, PanelIcons.State)
+		this.Tree.HeaderControl = this.State
+		this.Tree.Gate = this.State
 		this.Ally = this.Tree.AddToggle(
 			"Allies",
 			false,
 			"Show allies",
 			-1,
-			ImageData.GetRankTexture(LaneSelection.HARD_SUPPORT)
+			PanelIcons.Allies
 		)
-
 		this.BackPack = this.Tree.AddToggle(
 			"Backpack",
 			false,
 			"Show backpack",
 			-1,
-			ImageData.Icons.icon_brackets
+			PanelIcons.Backpack
 		)
-
 		this.Charge = this.Tree.AddToggle(
 			"ItemPanel_Charge_State",
 			true,
 			undefined,
 			-1,
-			ImageData.Icons.icon_svg_charges
+			PanelIcons.Charges
 		)
 		this.Cooldown = this.Tree.AddToggle(
 			"ItemPanel_Cooldwn_State",
 			true,
 			undefined,
 			-1,
-			ImageData.Icons.icon_svg_duration
+			PanelIcons.Cooldown
 		)
-
 		this.FormatTime = this.Tree.AddToggle(
 			"Cooldown format time",
 			false,
 			"Show cooldown format time (min:sec)",
 			-1,
-			ImageData.Icons.icon_svg_format_time
+			PanelIcons.FormatTime
+		)
+
+		this.Animation = this.Tree.AddToggle(
+			"Animation",
+			true,
+			"Bring a new item onto the panel instead of\nswitching it on: the cell fades into its\nslot and is rung in, and its neighbours glide",
+			-1,
+			PanelIcons.Animation
 		)
 
 		this.HiddenItems = new HiddenItems(this.Tree)
+		this.Style = new TextStyleMenu(this.Tree)
 
-		const treeBinds = this.Tree.AddNode("Binds", ImageData.Icons.icon_svg_keyboard)
+		const treeBinds = this.Tree.AddNode("Binds", PanelIcons.Binds)
 		treeBinds.SortNodes = false
 		this.ToggleKey = treeBinds.AddKeybind("Key", "None", "Key turn on/off panel")
+		this.ToggleKey.IconPath = PanelIcons.Key
 		this.TouchKeyPanel = treeBinds.AddKeybind(
 			"Touch panel",
 			"Ctrl",
 			"The button captures the panel\nfor dragging on the screen.\nIf the button is not set, the panel can only\nbe dragged using the mouse"
 		)
+		// ctrl is the game's own key too, so the press has to reach both
+		this.TouchKeyPanel.ClaimsKey = false
+		this.TouchKeyPanel.IconPath = PanelIcons.TouchPanel
 		this.ModeKey = treeBinds.AddDropdown(
 			"Key mode",
 			["Hold key", "Toggled"],
 			1,
 			"Key mode turn on/off panel"
 		)
+		this.ModeKey.IconPath = PanelIcons.KeyMode
 
-		const settingsTree = this.Tree.AddNode("Settings", ImageData.Icons.icon_settings)
-		settingsTree.SortNodes = false
-		this.Size = settingsTree.AddSlider("Size", 6, 0, 20)
-		this.Opacity = settingsTree.AddSlider("Opacity", 0, 0, 50)
-		this.Position = this.Tree.AddVector2(
-			"Settings",
-			new Vector2(0, 547),
-			new Vector2(0, 0),
-			new Vector2(1920, 1080)
-		)
+		this.Overlay = new MenuSDK.OverlayMenu(this.Tree, 0, 547)
 
 		this.ToggleKey.OnRelease(() => (this.IsToggled = !this.IsToggled))
+		this.State.OnValue(control => this.Overlay.SetHidden(!control.value))
+		this.Overlay.SetHidden(!this.State.value)
+	}
+
+	public get IsOpen(): boolean {
+		return MenuSDK.MenuManager.IsOpen && this.Tree.IsOpen
 	}
 }
